@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Evaluativity Interval</title>
+    <script src="https://unpkg.com/jspsych@7.3.4" type="text/javascript"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-external-html"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-keyboard-response"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-html-slider-response"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-canvas-button-response"></script>
+    <script src="https://unpkg.com/@jspsych/extension-mouse-tracking"></script>
+    <script src="external/plugin-canvas-slider-response.js"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-canvas-keyboard-response"></script>
+    <script src="https://unpkg.com/@jspsych/plugin-preload"></script>
+    <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js"></script>
+    <link href="https://unpkg.com/jspsych/css/jspsych.css" rel="stylesheet" type="text/css">
+    <script>
+        /** INITIALIZE jsPsych **/
+        var jsPsych = initJsPsych({
+            show_progress_bar: true,
+          });
+    </script>
+    <script src="./utils/blob.js"></script>
+    <script src="./utils/draw.js"></script>
+    <script src="./utils/canvasMorpher.js"></script>
+    <script src="./utils/util.js"></script>
+    <script src="./blocks/prompts.js"></script>
+    <script src="./blocks/slider_response.js"></script>
+    <script src="./blocks/block_intervention.js"></script>
+    <script src="./blocks/consent_handler.js"></script>
+    <script src="./utils/logsaver.js"></script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .jspsych-progressbar-container {
+          margin: 0px auto !important;
+        }
+        .jspsych-btn { padding: 1px 20px;
+        font-size: 15px;
+        border-color: black;
+        }
+        #jspsych-canvas-slider-response-wrapper {
+          margin: 0px auto !important;
+          margin-bottom: 30px !important;
+        }
+        .jspsych-canvas-slider-response-container {
+          margin: 0px auto !important;
+        }
+        .inactive-slider::-webkit-slider-thumb {
+          background-color: transparent;
+          border: none;
+          opacity: 0.5;
+        }
+        .inactive-slider::-moz-range-thumb {
+          background-color: #ccc;
+          border: 1px solid #aaa;
+        }
+        .jspsych-btn {
+          margin: 0.4em;
+        }
+    </style>
+
+  </head>
+  <body>
+  <script type="module">
+    //set global random before random seed to garantee it's non-deterministic
+    // global random variables including: linguistic label assignment, By-group condition
+    const group = [0,1,2][Math.floor(Math.random() * 3)]; // get group_name;
+    var subjectID = setupSubjectID(jsPsych);
+    var consentTrial = createConsentTrial();
+    const expID = "jFKxMdNLNIdB"; //register an new experiment via OSF
+    window.linglabels = Shuffle(['raflen', 'luprit']);
+    const [A, B] = linglabels;
+    const labelDict = {
+          "[[0, 0.5]]": [A, 0],
+          "[[0.5, 1.1]]": [B, 1]
+    };
+    var labelCond = (group === 0) ? 'Ord' : (group === 1) ? 'Int' : 'Rat';
+    let condition = String(A)[0] + String(B)[0] + labelCond;
+    console.log(subjectID, condition)
+    var saveTrial = saveServerData(expID, subjectID, labelCond, condition);
+    //Set random seed for consistency, using string 'fixed-seed'
+    Math.seedrandom('fixed-seed'); // random generated order per trial are same across subjects
+    let blobs = null;
+    window.sharedBlobsReady = loadBlobsFromJSON('./design/exp2.json').then(blobs => {
+      window.sharedBlobs = blobs;
+    });
+
+    //Define trial numbers
+    // const pre_trial = 20;
+    const pre_trial = 2;
+    var learn = 40;
+    var PassActRatio = [7,13,7,13];
+    const [label_trial, degQ_trial, Equa_trial, Comp_trial] = [10, 8, 8, 8];
+
+    //debug
+    // var pre_trial = 2;
+    // var learn = 8;
+    // var PassActRatio = [1,3,1,3];
+    // const [label_trial, degQ_trial, Equa_trial, Comp_trial] = [1, 1, 1, 1];
+
+    //               Methods                                      Prompts
+    //Slider        {SliderMorph, SliderPair, SliderOverlap};     {PreLabelSlider, DegQSlider, EquaSlider, CompSlider};
+    //Intervention  {MorphSingle, MorphPair};                     {LabelLearn, MeaLearn};
+    const slider_config = [{radiusRange:[0,1], randRange:[0.3,0.7], numStimuli:pre_trial}]
+    let pre_stimuli = BlockAppend2({labelDict, configs: slider_config, trialType: 'PreLabelSlider'});
+    console.log(`${pre_trial} Preslider baseline stimuli:`, pre_stimuli);
+
+    const comp_config = [{radiusRange:[0,0.3], randRange:[0.3,0.7]},
+                        {radiusRange:[0.7,1], randRange:[0.3,0.7]}]
+
+    const CompOrdBlocks = BlockAppend2({labelDict, configs: comp_config,
+                          numStimuli:learn, passActRatio: PassActRatio,
+                          trialType:'RelLearn', labelType:['Bare', 'Adv']});
+    const CompIntBlocks = BlockAppend2({labelDict, configs: comp_config,
+                          numStimuli:learn, passActRatio: PassActRatio,
+                          trialType:'RelLearn', labelType:['Bare', 'MP']});
+    const CompRatBlocks = BlockAppend2({labelDict, configs: comp_config,
+                          numStimuli:learn, passActRatio: PassActRatio,
+                          trialType:'AbsLearn', labelType:['Bare', 'MP']});
+    console.log("Ordinal learn:", CompOrdBlocks);
+    console.log("Interval learn:", CompIntBlocks);
+    console.log("Ratio learn:", CompRatBlocks);
+
+    const equal_config = [{radiusRange:[0,1], randRange:[0.3,0.7]},
+                        {radiusRange:[0,1], randRange:[0.3,0.7]}]
+    const degQ_config = [{radiusRange:[0,1], randRange:[0.3,0.7], numStimuli:degQ_trial}]
+    let post_stimuli = BlockAppend2({labelDict, configs: comp_config, numStimuli:Comp_trial, trialType:'CompSlider'});
+    post_stimuli = BlockAppend2({stimuliSet:post_stimuli, configs: equal_config, labelDict, numStimuli:Equa_trial, trialType:'EquaSlider'});
+    post_stimuli = BlockAppend2({stimuliSet:post_stimuli, configs: degQ_config, labelDict, trialType:'DegQSlider'});
+    console.log("Test stimuli:", post_stimuli);
+
+    // downloadConsoleLogs(pre_stimuli, CompOrdBlocks, CompIntBlocks, CompRatBlocks, post_stimuli);
+
+    //Get trials
+    const prompts = getpromptTrials();
+    const preSlider = GetSlider(prompts, pre_stimuli, 'pre_slider');
+    const postAbsSlider = GetPostLearnSlider(prompts, post_stimuli, 'test_slider');
+
+    const CompInterPass1 = GerCombinedPass(prompts, CompOrdBlocks[0], 'intervention');
+    const CompInterActive1 = GerCombinedAct(prompts, CompOrdBlocks[1], 'intervention');
+    const CompInterPass2 = GerCombinedPass(prompts, CompOrdBlocks[2], 'intervention');
+    const CompInterActive2 = GerCombinedAct(prompts, CompOrdBlocks[3], 'intervention');
+
+    const RelInterPass1 = GerCombinedPass(prompts, CompIntBlocks[0], 'intervention');
+    const RelInterActive1 = GerCombinedAct(prompts, CompIntBlocks[1], 'intervention');
+    const RelInterPass2 = GerCombinedPass(prompts, CompIntBlocks[2], 'intervention');
+    const RelInterActive2 = GerCombinedAct(prompts, CompIntBlocks[3], 'intervention');
+
+    const AbsInterPass1 = GerCombinedPass(prompts, CompRatBlocks[0], 'intervention');
+    const AbsInterActive1 = GerCombinedAct(prompts, CompRatBlocks[1], 'intervention');
+    const AbsInterPass2 = GerCombinedPass(prompts, CompRatBlocks[2], 'intervention');
+    const AbsInterActive2 = GerCombinedAct(prompts, CompRatBlocks[3], 'intervention');
+
+    //Build timeline
+    const timeline = [];
+    timeline.push(prompts.openning);
+    timeline.push(consentTrial);
+    timeline.push(prompts.PreSlider_instruction, preSlider); //Pre-intervention block
+    if (labelCond == "Ord"){ //comparative + intensifier rel
+      timeline.push(prompts.PassAbs_instruction, CompInterPass1, prompts.ActAbs_instruction, CompInterActive1,
+                    prompts.PassLearn_continue, CompInterPass2, prompts.ActLearn_continue, CompInterActive2);
+    } else if (labelCond == "Int"){ //comparative + MP rel
+      timeline.push(prompts.PassAbs_instruction, RelInterPass1, prompts.ActAbs_instruction, RelInterActive1,
+                    prompts.PassLearn_continue, RelInterPass2, prompts.ActLearn_continue, RelInterActive2);
+    } else if (labelCond == "Rat"){ //comparative + MP
+      timeline.push(prompts.PassAbs_instruction, AbsInterPass1, prompts.ActAbs_instruction, AbsInterActive1,
+                    prompts.PassLearn_continue, AbsInterPass2, prompts.ActLearn_continue, AbsInterActive2); //Intervention block
+    }
+    timeline.push(prompts.PostSlider_instruction, postAbsSlider); //Post-intervention block
+    timeline.push(prompts.waiting, saveTrial);
+    timeline.push(prompts.closing);
+
+    jsPsych.run(timeline)
+  </script>
+</body>
+</html>
