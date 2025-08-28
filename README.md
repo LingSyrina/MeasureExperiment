@@ -2,9 +2,7 @@ Go to the [main experiment website](https://lingsyrina.github.io/MagnitudeExperi
 
 For experiment 1: check [English version](https://lingsyrina.github.io/MagnitudeExperiments/ExpA_gradability.html) and [Mandarin version](https://lingsyrina.github.io/MagnitudeExperiments/ExpA_gradability_zh.html)
 
-For experiment 2: check [current web](https://lingsyrina.github.io/MagnitudeExperiments/ExpB_evaluativity.html)
-
-For experiment 3: check [current web](https://lingsyrina.github.io/MagnitudeExperiments/exp3_AdjLev.html)
+For experiment 2: check [current web](https://lingsyrina.github.io/MeasureExperiment/ExpB_evaluativity.html)
 
 # 1. Code structure
 ```
