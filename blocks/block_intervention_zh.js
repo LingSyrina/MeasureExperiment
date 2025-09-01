@@ -25,7 +25,6 @@ function createLoopedTrial(stim, createTrial, prompts, pair=false) {
             }}],
           }}
 
-
 function GetLabelPass(prompts, block_stimuli, task_name) {
   // Dynamically create the trial
   const randomizedStimuli = jsPsych.randomization.shuffle(block_stimuli);

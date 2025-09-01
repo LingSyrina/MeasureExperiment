@@ -237,7 +237,7 @@ function GeneratePairMorphFlex({pairConfigs = [{ radiusRange: [0, 1], randRange:
     return stimuli;
 }
 
-// function for experiment 2
+// function for experiment 2: used for all testing trials
 function GeneratePairMorphFlex2({pairConfigs = [{ radiusRange: [0, 1], randRange: [0, 1]},
                                                 { radiusRange: [0, 1], randRange: [0, 1]}],
                                                 numStimuli = 10, DegPrecision = 0.3, labelDict = {}, equal=false, ModType='modifier'} = {}){
@@ -265,7 +265,7 @@ function GeneratePairMorphFlex2({pairConfigs = [{ radiusRange: [0, 1], randRange
       const [adj, key] = getCompAdj({ Pos });
       const degAdv = ModType === 'modifier' ? getDegAdv({ d: diff / DegPrecision, mode: ModType }): getDegAdv({ d: p2 / DegPrecision, mode: ModType });
       console.log(ModType, degAdv);
-      stimuli.push({radius: [p1, p2], rand:[rnd1, rnd2], adj, deg:degAdv.Deg, adv:degAdv.Adv,key,LevKey: degAdv.LevKey, randomlabel:getRandomLabel()});
+      stimuli.push({radius: [p1, p2], rand:[rnd1, rnd2], adj, deg:degAdv.Deg, adv:degAdv.Adv, key, LevKey: degAdv.LevKey, randomlabel:getRandomLabel()});
     }
     return stimuli;
 }
@@ -390,7 +390,7 @@ function BlockAppend2({stimuliSet = [],labelDict = {}, configs = [],
     }
   } else if (
     ['PreLabelSlider', 'DegQSlider', 'CompSlider', 'EquaSlider'].includes(trialType)){
-    if (trialType === 'PreLabelSlider' || trialType === 'DegQSlider') {
+    if (trialType === 'PreLabelSlider' || trialType === 'DegQSlider') { //no longer need degQ slider, use it as double control with equa/comp trials
       stimuli = GenerateSingleMorph({ configs, labelDict });
       method = (trialType === 'PreLabelSlider') ? 'SliderMorph' : 'MorphSingle';
     } else if (trialType === 'CompSlider') {
@@ -411,7 +411,7 @@ function BlockAppend2({stimuliSet = [],labelDict = {}, configs = [],
     return stimuliSet;
   }
 }
- 
+
 //******** Incorporate functions globally ********//
 window.Morphfunction = Morphfunction;
 window.Shuffle = Shuffle;

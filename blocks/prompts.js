@@ -252,14 +252,33 @@ function DegQSlider(stimulus) {
     <p style="margin-Bottom: 2px !important; font-size: 23px;"><b>How ${randomlabel} was the pink object?</b></p>
 `;}
 function EquaSlider(stimulus) {
-  const randomlabel = stimulus.randomlabel;
+  const correct = stimulus.key; //assume key is a level (numeric)
+  const randEqua = stimulus.randomlabel;
+  const LevArray = Array.from({ length: linglabels.length }, (_, i) => i);
+  const remainingLabels = LevArray.filter(label => label !== correct);
+  const randomLabel = remainingLabels[Math.floor(Math.random() * remainingLabels.length)];
+  const [Ia, Ib] = Shuffle([randomLabel, correct]);
+  stimulus.key = (Ia === correct) ? 'q': 'p';
+  stimulus.truelabel = `as ${randEqua} as`;
+  const [A, B] = [linglabels[Ia], linglabels[Ib]];
+  stimulus.order = [`${A}er than`, `${B}er than`, `as ${randEqua} as`];
   return `
-    <p style="margin-Bottom: 2px !important; font-size: 23px;">The pink object is <b>as <i>${randomlabel}</i> as</b> the grey object.</p>
+    <p style="margin-Bottom: 2px !important; font-size: 23px;">The pink object is ___ the grey object.</p>
 `;}
 function CompSlider(stimulus) {
   const adj = stimulus.adj;
+  const correct = stimulus.key; //assume key is a level (numeric)
+  const randEqua = stimulus.randomlabel;
+  const LevArray = Array.from({ length: linglabels.length }, (_, i) => i);
+  const remainingLabels = LevArray.filter(label => label !== correct);
+  const randomLabel = remainingLabels[Math.floor(Math.random() * remainingLabels.length)];
+  const [Ia, Ib] = Shuffle([randomLabel, correct]);
+  stimulus.key = (Ia === correct) ? 'q': 'p';
+  stimulus.truelabel = `${adj}er than`;
+  const [A, B] = [linglabels[Ia], linglabels[Ib]];
+  stimulus.order = [`${A}er than`, `${B}er than`, `as ${randEqua} as`];
   return `
-    <p style="margin-Bottom: 2px !important; font-size: 23px;">The pink object is <b><i>${adj}er</i></b> than the grey object.</p>
+    <p style="margin-Bottom: 2px !important; font-size: 23px;">The pink object is ___ the grey object.</p>
 `;}
 
 const OverSlider = `
@@ -324,6 +343,7 @@ function CompLearnAct(stimulus, labelType) {
   stimulus.key = (Ia === correct) ? 'q': 'p';
   const [A, B] = [linglabels[Ia], linglabels[Ib]];
   stimulus.order = [`${A}er`, `${B}er`];
+  stimulus.modorder = [`slightly`, `somewhat`, `much`];
   return `
     <p style="margin-Bottom: 2px !important;">The pink object is ___ than the grey object.</br>
     <strong>Q</strong>: <strong>${A}er</strong>.&emsp;&emsp; <strong>P</strong>: <strong>${B}er</strong>.</p>
@@ -332,6 +352,7 @@ function CompLearnAct(stimulus, labelType) {
 function AbsLearnAct(stimulus, labelType) { //three level for complement adv/MP
   const [A, B, C] = (labelType === 'MP') ? ['about 3 frms', 'about 4 frms', 'about 5 frms']:['slightly', 'somewhat', 'very'];
   const adj = stimulus.adj;
+  stimulus.modorder = [`${A}`, `${B}`, `${C}`];
   return `
     <p style="margin-Bottom: 2px !important;">The pink object is </br>
     <strong>Q</strong>: <strong>${A}</strong>.&emsp;&emsp; <strong>T</strong>: <strong>${B}</strong>.&emsp;&emsp; <strong>P</strong>: <strong>${C}</strong>.</p>

@@ -24,9 +24,9 @@
     <script src="./utils/draw.js"></script>
     <script src="./utils/canvasMorpher.js"></script>
     <script src="./utils/util.js"></script>
-    <script src="./blocks/prompts.js"></script>
-    <script src="./blocks/slider_response.js"></script>
-    <script src="./blocks/block_intervention.js"></script>
+    <script src="./blocks/mandarin_prompts.js"></script>
+    <script src="./blocks/slider_response_zh.js"></script>
+    <script src="./blocks/block_intervention_zh.js"></script>
     <script src="./blocks/consent_handler.js"></script>
     <script src="./utils/logsaver.js"></script>
 
@@ -81,7 +81,7 @@
     var subjectID = setupSubjectID(jsPsych);
     var consentTrial = createConsentTrial();
     const expID = "jFKxMdNLNIdB"; //register an new experiment via OSF
-    window.linglabels = Shuffle(['raflen', 'luprit']);
+    window.linglabels = Shuffle(['máchú', 'lùzhí']);
     const [A, B] = linglabels;
     const labelDict = {
           "[[0, 0.5]]": [A, 0],
