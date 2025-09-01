@@ -250,7 +250,7 @@ const OverSlider = `
   <p style="margin-Bottom: 2px !important;">请使用滑动条<b>标记粉色的图形的位置</b></p>
 `;
 
-
+// label prompts (passive)
 function LabLearn(stimulus, labelType) {
   const adj = stimulus.adj;
   return `
@@ -266,23 +266,25 @@ function CompLearn(stimulus, labelType) {
 `;}
 
 function AbsLearn(stimulus, labelType) {
-  const modifier = (labelType === 'MP') ? stimulus.deg + ' 格' : (labelType === 'Adv') ? stimulus.adv : '';
+  const modifier = (labelType === 'MP') ? stimulus.deg + 'fr' : (labelType === 'Adv') ? stimulus.adv : '';
   const adj = (labelType === 'Bare' || labelType === 'Adv') ? stimulus.adj : '';
   return `
-    <p style="margin-Bottom: 2px !important;">这个粉色的图形是${(labelType === 'MP') ? '大约 ' : ''}
-    <b><i>${modifier ? modifier + ' ' : ''}${adj}</i></b>。</br>
+    <p style="margin-Bottom: 2px !important;">这个粉色的图形${(labelType === 'MP') ? '约' : ''}
+    <b><i>${modifier ? modifier : ''}${adj}</i></b>。</br>
     (按空格键继续。)</p>
 `;}
 
 function RelLearn(stimulus, labelType) {
-  const modifier = (labelType === 'Adv') ? stimulus.adv : stimulus.deg + ' 格';
+  stimulus.adv = [`一点`, `不少`, `很多`][stimulus.deg-1];
+  const modifier = (labelType === 'Adv') ? stimulus.adv : stimulus.deg + 'fr';
   const adj = stimulus.adj;
   return `
-    <p style="margin-Bottom: 2px !important;">这个粉色的图形比灰色的图形${adj}${(labelType === 'MP') ? '大约 ' : ''}
-    <b><i>${modifier ? modifier + ' ' : ''}</i></b>。</br>
+    <p style="margin-Bottom: 2px !important;">这个粉色的图形比灰色的图形${adj}${(labelType === 'MP') ? '约' : ''}
+    <b><i>${modifier ? modifier : ''}</i></b>。</br>
     (按空格键继续。)</p>
 `;}
 
+// label prompts (active)
 function LabLearnAct(stimulus, labelType) {
   const correct = stimulus.key;
   const LevArray = Array.from({ length: linglabels.length }, (_, i) => i);
@@ -299,34 +301,41 @@ function LabLearnAct(stimulus, labelType) {
 
 function CompLearnAct(stimulus, labelType) {
   const adj = stimulus.adj;
-  const correct = stimulus.key;
+  stimulus.adv = [`一点`, `不少`, `很多`][stimulus.deg-1];
+  const correct = stimulus.key; //assume key is a level (numeric)
   const LevArray = Array.from({ length: linglabels.length }, (_, i) => i);
   const remainingLabels = LevArray.filter(label => label !== correct);
   const randomLabel = remainingLabels[Math.floor(Math.random() * remainingLabels.length)];
   const [Ia, Ib] = Shuffle([randomLabel, correct]);
-  stimulus.key = (Ia === correct) ? 'q' : 'p';
+  stimulus.key = (Ia === correct) ? 'q': 'p';
   const [A, B] = [linglabels[Ia], linglabels[Ib]];
   stimulus.order = [`${A}`, `${B}`];
+  stimulus.modorder = [`一点`, `不少`, `很多`];
   return `
-    <p style="margin-Bottom: 2px !important;">粉色的图形<b>比灰色的图形___</b>：</br>
-    <strong>Q</strong>: <strong>${A}</strong>    <strong>P</strong>: <strong>${B}</strong></p>
-`;}
+    <p style="margin-Bottom: 2px !important;">粉色的图形<b>比灰色的图形_____</b>。</p>
+  `;}
 
 function AbsLearnAct(stimulus, labelType) {
-  const [A, B, C] = (labelType === 'MP') ? ['大约 3 格', '大约 4 格', '大约 5 格'] : ['有点', '比较', '非常'];
+  const degset = ['约3fr', '约4fr', '约5fr']
+  stimulus.adv = [`一点`, `不少`, `很多`][stimulus.deg-1];
+  const [A, B, C] = (labelType === 'MP') ? degset : ['有点', '比较', '非常'];
   const adj = stimulus.adj;
+  stimulus.modorder = [`${A}`, `${B}`, `${C}`];
+  stimulus.truemod = (labelType === 'MP') ? degset[stimulus.deg-3]: stimulus.adv;
   return `
-    <p style="margin-Bottom: 2px !important;">这个粉色图形：</br>
-    <strong>Q</strong>: <strong>${A}</strong>    <strong>T</strong>: <strong>${B}</strong>    <strong>P</strong>: <strong>${C}</strong></p>
+    <p style="margin-Bottom: 2px !important;">这个粉色图形_____</br>。</p>
 `;}
 
 function RelLearnAct(stimulus, labelType) {
-  const [A, B, C] = (labelType === 'MP') ? ['大约 1 格', '大约 2 格', '大约 3 格'] : ['一点', '不少', '很多'];
+  const degset = ['约1fr', '约2fr', '约3fr']
+  stimulus.adv = [`一点`, `不少`, `很多`][stimulus.deg-1];
+  const [A, B, C] = (labelType === 'MP') ? degset: ['一点', '不少', '很多'];
   const adj = stimulus.adj;
   stimulus.key = stimulus.LevKey;
+  stimulus.modorder = [`${A}`, `${B}`, `${C}`];
+  stimulus.truemod = (labelType === 'MP') ? degset[stimulus.deg-1]: stimulus.adv;
   return `
-    <p style="margin-Bottom: 2px !important;">这个粉色图形比灰色图形<b>${adj}</b>多少？</br>
-    <strong>Q</strong>: <strong>${adj}${A}</strong>    <strong>T</strong>: <strong>${adj}${B}</strong>    <strong>P</strong>: <strong>${adj}${C}</strong></p>
+    <p style="margin-Bottom: 2px !important;">这个粉色图形比灰色图形<b>${adj}_____</b>。</p>
 `;}
 
 function IntLab(stimulus, labelType) {

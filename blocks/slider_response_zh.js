@@ -14,7 +14,7 @@ function createLoopedSliderPair(stim, createTrialA, createTrialB, prompts, pair=
             }
           ],
         }}
-        
+
 function GetSlider(prompts, block_stimuli, task_name) {
   // Dynamically create the trial
   const randomizedStimuli = jsPsych.randomization.shuffle(block_stimuli);
@@ -180,10 +180,10 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
         const canvas = document.querySelector('canvas');
         const prompt = document.createElement('div');
         const truelabel = jsPsych.timelineVariable('truelabel')
-        const statement = `<p style="margin-Bottom: 5px !important;">The pink object was <b>${truelabel}</b> the grey object.</p>`
+        const statement = `<p style="margin-Bottom: 5px !important;">粉色的图形____灰色的图形<b>${truelabel}</b>。</p>`
         prompt.innerHTML = _condition === 1
-          ? statement + `<p style="margin-Bottom: 5px !important;">Use the two reference objects, <b>place the pink object on the scale</b>.</p>`
-          : statement + `<p style="margin-Bottom: 5px !important;"><b>How ${_randlabel} was the pink object?</b></p>`;
+          ? statement + `<p style="margin-Bottom: 5px !important;">根据灰色参照物, <b>将粉色的图形放在滑条上</b>。</p>`
+          : statement + `<p style="margin-Bottom: 5px !important;"><b>粉色的图形多${_randlabel}?</b></p>`;
         prompt.style.textAlign = 'center';
         prompt.style.marginBottom = '20px';
         canvas.insertAdjacentElement('beforebegin', prompt);
@@ -210,6 +210,7 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
     timeline: postLearnTimeline,
   };
 };
+
 
 
 window.GetSlider = GetSlider;

@@ -251,6 +251,7 @@ function DegQSlider(stimulus) {
   return `
     <p style="margin-Bottom: 2px !important; font-size: 23px;"><b>How ${randomlabel} was the pink object?</b></p>
 `;}
+
 function EquaSlider(stimulus) {
   const correct = stimulus.key; //assume key is a level (numeric)
   const randEqua = stimulus.randomlabel;
@@ -265,6 +266,7 @@ function EquaSlider(stimulus) {
   return `
     <p style="margin-Bottom: 2px !important; font-size: 23px;">The pink object is ___ the grey object.</p>
 `;}
+
 function CompSlider(stimulus) {
   const adj = stimulus.adj;
   const correct = stimulus.key; //assume key is a level (numeric)
