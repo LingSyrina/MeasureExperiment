@@ -345,26 +345,28 @@ function CompLearnAct(stimulus, labelType) {
   stimulus.order = [`${A}er`, `${B}er`];
   stimulus.modorder = [`slightly`, `somewhat`, `much`];
   return `
-    <p style="margin-Bottom: 2px !important;">The pink object is ___ than the grey object.</br>
-    <strong>Q</strong>: <strong>${A}er</strong>.&emsp;&emsp; <strong>P</strong>: <strong>${B}er</strong>.</p>
+    <p style="margin-Bottom: 2px !important;">The pink object is ______ than the grey object.</br></p>
 `;}
 
 function AbsLearnAct(stimulus, labelType) { //three level for complement adv/MP
-  const [A, B, C] = (labelType === 'MP') ? ['about 3 frms', 'about 4 frms', 'about 5 frms']:['slightly', 'somewhat', 'very'];
+  const degset = ['about 3 frms', 'about 4 frms', 'about 5 frms'];
+  const [A, B, C] = (labelType === 'MP') ? degset:['slightly', 'somewhat', 'very'];
   const adj = stimulus.adj;
   stimulus.modorder = [`${A}`, `${B}`, `${C}`];
+  stimulus.truemod = (labelType === 'MP') ? degset[stimulus.deg-3]: stimulus.adv;
   return `
-    <p style="margin-Bottom: 2px !important;">The pink object is </br>
-    <strong>Q</strong>: <strong>${A}</strong>.&emsp;&emsp; <strong>T</strong>: <strong>${B}</strong>.&emsp;&emsp; <strong>P</strong>: <strong>${C}</strong>.</p>
+    <p style="margin-Bottom: 2px !important;">The pink object is ______. </br></p>
 `;}
 
 function RelLearnAct(stimulus, labelType) { //three level for modifier adv/MP
-  const [A, B, C] = (labelType === 'MP') ? ['about 1 frm', 'about 2 frms', 'about 3 frms']:['slightly', 'somewhat', 'much'];
+  const degset = ['about 1 frm', 'about 2 frms', 'about 3 frms'];
+  const [A, B, C] = (labelType === 'MP') ? degset :['slightly', 'somewhat', 'much'];
   const adj = stimulus.adj;
+  stimulus.modorder = [`${A}`, `${B}`, `${C}`];
+  stimulus.truemod = (labelType === 'MP') ? degset[stimulus.deg-1]: stimulus.adv;
   // stimulus.key = stimulus.LevKey;
   return `
-    <p style="margin-Bottom: 2px !important;">Compared to the grey object, how much ${adj}er is the pink object?</br>
-    <strong>Q</strong>: <strong>${A}</strong>.&emsp;&emsp; <strong>T</strong>: <strong>${B}</strong>.&emsp;&emsp; <strong>P</strong>: <strong>${C}</strong>.</p>
+    <p style="margin-Bottom: 2px !important;">The pink object is ______ ${adj}er than the grey object.</br></p>
 `;}
 
 //this is ugly, try to revise?

@@ -272,12 +272,12 @@ function GerCombinedAct(prompts, block_stimuli, task_name){
     type: jsPsychCanvasButtonResponse,
     canvas_size: [250,600],
     stimulus: async function (c) {
-      console.log(jsPsych.timelineVariable('order'), jsPsych.timelineVariable('truelabel'));
+      console.log(jsPsych.timelineVariable('order'), jsPsych.timelineVariable('adj'));
       const method = jsPsych.timelineVariable('method');
       const radius = jsPsych.timelineVariable('radius');
       const rand = jsPsych.timelineVariable('rand');
       const condition = Math.random() < 0.5 ? 0 : 1;
-      await Morphfunction({ canvas: c, par: radius, rand: rand, condition: condition, method: method });
+      await Morphfunction({ canvas: c, par: radius, rand: rand, condition: condition, method: method[0] });
       // const dataURL = canvas.toDataURL();
       return c;
     },
@@ -288,7 +288,7 @@ function GerCombinedAct(prompts, block_stimuli, task_name){
     on_load: function() { // Move prompt div below canvas, before buttons
       const canvas = document.querySelector('canvas');
       const prompt = document.createElement('div');
-      prompt.innerHTML = jsPsych.timelineVariable('prompt');
+      prompt.innerHTML = jsPsych.timelineVariable('promptBare');
       prompt.style.textAlign = 'center';
       prompt.style.marginTop = '10px';
       canvas.insertAdjacentElement('afterend', prompt); // Insert the prompt after the canvas
@@ -300,7 +300,9 @@ function GerCombinedAct(prompts, block_stimuli, task_name){
       task: task_name,
       radius: () => jsPsych.timelineVariable('radius'),
       rand: () => jsPsych.timelineVariable('rand'),
-      key: () => jsPsych.timelineVariable('key'),
+      adj: () => jsPsych.timelineVariable('adj')+'er',
+      truemod: () => jsPsych.timelineVariable('truemod'),
+      order: () => jsPsych.timelineVariable('order'),
       method: () => jsPsych.timelineVariable('method')[0]
     },
     on_finish: function(data) { // Score the response as correct or incorrect.
@@ -316,12 +318,12 @@ function GerCombinedAct(prompts, block_stimuli, task_name){
     type: jsPsychCanvasButtonResponse,
     canvas_size: [250,600],
     stimulus: async function (c) {
-      console.log(jsPsych.timelineVariable('order'), jsPsych.timelineVariable('truelabel'));
+      console.log(jsPsych.timelineVariable('order'), jsPsych.timelineVariable('truemod'));
       const method = jsPsych.timelineVariable('method');
       const radius = jsPsych.timelineVariable('radius');
       const rand = jsPsych.timelineVariable('rand');
       const condition = Math.random() < 0.5 ? 0 : 1;
-      await Morphfunction({ canvas: c, par: radius, rand: rand, condition: condition, method: method });
+      await Morphfunction({ canvas: c, par: radius, rand: rand, condition: condition, method: method[1] });
       // const dataURL = canvas.toDataURL();
       return c;
     },
@@ -332,7 +334,7 @@ function GerCombinedAct(prompts, block_stimuli, task_name){
     on_load: function() { // Move prompt div below canvas, before buttons
       const canvas = document.querySelector('canvas');
       const prompt = document.createElement('div');
-      prompt.innerHTML = jsPsych.timelineVariable('prompt');
+      prompt.innerHTML = jsPsych.timelineVariable('promptModified');
       prompt.style.textAlign = 'center';
       prompt.style.marginTop = '10px';
       canvas.insertAdjacentElement('afterend', prompt); // Insert the prompt after the canvas
@@ -344,11 +346,13 @@ function GerCombinedAct(prompts, block_stimuli, task_name){
       task: task_name,
       radius: () => jsPsych.timelineVariable('radius'),
       rand: () => jsPsych.timelineVariable('rand'),
-      key: () => jsPsych.timelineVariable('LevKey'),
+      adj: () => jsPsych.timelineVariable('adj')+'er',
+      truemod: () => jsPsych.timelineVariable('truemod'),
+      order: () => jsPsych.timelineVariable('modorder'),
       method: () => jsPsych.timelineVariable('method')[1]
     },
     on_finish: function(data) { // Score the response as correct or incorrect.
-      if (data.order[data.response] != data.adv) {
+      if (data.order[data.response] != data.truemod) {
         data.correct = false;
       } else {
         data.correct = true;
