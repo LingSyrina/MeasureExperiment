@@ -233,18 +233,36 @@ function DegQSlider(stimulus) {
 `;}
 
 function EquaSlider(stimulus) {
-  const randomlabel = stimulus.randomlabel;
+  const correct = stimulus.key; //assume key is a level (numeric)
+  const randEqua = stimulus.randomlabel;
+  const LevArray = Array.from({ length: linglabels.length }, (_, i) => i);
+  const remainingLabels = LevArray.filter(label => label !== correct);
+  const randomLabel = remainingLabels[Math.floor(Math.random() * remainingLabels.length)];
+  const [Ia, Ib] = Shuffle([randomLabel, correct]);
+  stimulus.key = (Ia === correct) ? 'q': 'p';
+  stimulus.truelabel = `和...一样${randEqua}`;
+  stimulus.adj = randEqua;
+  const [A, B] = [linglabels[Ia], linglabels[Ib]];
+  stimulus.order = [`比...${A}`, `比...${B}`, `和...一样${randEqua}`];
   return `
-    <p style="margin-Bottom: 2px !important;">粉色的图形与灰色的图形<b>一样<i>${randomlabel}</i></b>，</p>
-    <p style="margin-Bottom: 2px !important;">你会把粉色的图形放在滑动条的哪个位置？</p>
-`;}
+    <p style="margin-Bottom: 2px !important; font-size: 23px;">粉色的图形____灰色的图形______.</p>
+  `;}
 
 function CompSlider(stimulus) {
   const adj = stimulus.adj;
+  const correct = stimulus.key; //assume key is a level (numeric)
+  const randEqua = stimulus.randomlabel;
+  const LevArray = Array.from({ length: linglabels.length }, (_, i) => i);
+  const remainingLabels = LevArray.filter(label => label !== correct);
+  const randomLabel = remainingLabels[Math.floor(Math.random() * remainingLabels.length)];
+  const [Ia, Ib] = Shuffle([randomLabel, correct]);
+  stimulus.key = (Ia === correct) ? 'q': 'p';
+  stimulus.truelabel = `比...${adj}`;
+  const [A, B] = [linglabels[Ia], linglabels[Ib]];
+  stimulus.order = [`比...${A}`, `比...${B}`, `和...一样${randEqua}`];
   return `
-    <p style="margin-Bottom: 2px !important;">粉色的图形<b><i>比灰色的图形更${adj}</i></b>，</p>
-    <p style="margin-Bottom: 2px !important;">你会把粉色的图形放在滑动条的哪个位置？</p>
-`;}
+    <p style="margin-Bottom: 2px !important; font-size: 23px;">粉色的图形____灰色的图形______.</p>
+  `;}
 
 const OverSlider = `
   <p style="margin-Bottom: 2px !important;">请使用滑动条<b>标记粉色的图形的位置</b></p>
@@ -279,8 +297,8 @@ function RelLearn(stimulus, labelType) {
   const modifier = (labelType === 'Adv') ? stimulus.adv : stimulus.deg + 'fr';
   const adj = stimulus.adj;
   return `
-    <p style="margin-Bottom: 2px !important;">这个粉色的图形比灰色的图形${adj}${(labelType === 'MP') ? '约' : ''}
-    <b><i>${modifier ? modifier : ''}</i></b>。</br>
+    <p style="margin-Bottom: 2px !important;">这个粉色的图形比灰色的图形<b><i>${adj}${(labelType === 'MP') ? '约' : ''}
+    ${modifier ? modifier : ''}</i></b>。</br>
     (按空格键继续。)</p>
 `;}
 

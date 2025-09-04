@@ -208,7 +208,7 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
       on_load: function() { // Insert the prompt below canvas based on condition
         const canvas = document.querySelector('canvas');
         const prompt = document.createElement('div');
-        const truelabel = jsPsych.timelineVariable('truelabel')
+        const truelabel = jsPsych.timelineVariable('truelabel');
         const statement = `<p style="margin-Bottom: 5px !important;">The pink object was <b>${truelabel}</b> the grey object.</p>`
         prompt.innerHTML = _condition === 1
           ? statement + `<p style="margin-Bottom: 5px !important;">Use the two reference objects, <b>place the pink object on the scale</b>.</p>`

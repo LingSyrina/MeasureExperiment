@@ -158,7 +158,7 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
   });
 
   const createSliderOnlyTrial = () => {
-    let _condition, _randlabel;
+    let _condition;
 
     return ({
       type: jsPsychCanvasSliderResponse,
@@ -167,7 +167,6 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
         const method = 'SliderRef';
         const radius = jsPsych.timelineVariable('radius');
         const rand = jsPsych.timelineVariable('rand');
-        _randlabel = jsPsych.timelineVariable('randomlabel');
         _condition = Math.random() < 0.5 ? 1 : 0; // governs reference order
         await Morphfunction({ canvas: c, par: radius, rand: rand, condition: _condition, method: method });
         return c;
@@ -179,11 +178,13 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
       on_load: function() { // Insert the prompt below canvas based on condition
         const canvas = document.querySelector('canvas');
         const prompt = document.createElement('div');
-        const truelabel = jsPsych.timelineVariable('truelabel')
-        const statement = `<p style="margin-Bottom: 5px !important;">粉色的图形____灰色的图形<b>${truelabel}</b>。</p>`
+        const adj = jsPsych.timelineVariable('adj');
+        const truelabel = jsPsych.timelineVariable('truelabel');
+        const [before, after] = truelabel.split(/\.\.\./);
+        const statement = `<p style="margin-Bottom: 5px !important;">粉色的图形${before}灰色的图形<b>${after}</b>。</p>`
         prompt.innerHTML = _condition === 1
           ? statement + `<p style="margin-Bottom: 5px !important;">根据灰色参照物, <b>将粉色的图形放在滑条上</b>。</p>`
-          : statement + `<p style="margin-Bottom: 5px !important;"><b>粉色的图形多${_randlabel}?</b></p>`;
+          : statement + `<p style="margin-Bottom: 5px !important;"><b>粉色的图形多${adj}?</b></p>`;
         prompt.style.textAlign = 'center';
         prompt.style.marginBottom = '20px';
         canvas.insertAdjacentElement('beforebegin', prompt);
