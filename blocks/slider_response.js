@@ -209,9 +209,9 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
         const canvas = document.querySelector('canvas');
         const prompt = document.createElement('div');
         const truelabel = jsPsych.timelineVariable('truelabel');
-        const statement = `<p style="margin-Bottom: 5px !important;">The pink object was <b>${truelabel}</b> the grey object.</p>`
+        const statement = `<p style="margin-Bottom: 10px !important;">The pink object was <b>${truelabel}</b> the grey object.</p>`
         prompt.innerHTML = _condition === 1
-          ? statement + `<p style="margin-Bottom: 5px !important;">Use the two reference objects, <b>place the pink object on the scale</b>.</p>`
+          ? statement + `<p style="margin-Bottom: 5px !important;">Use the two reference objects, <b>place the pink object you saw on the scale</b>.</p>`
           : statement + `<p style="margin-Bottom: 5px !important;"><b>How ${_randlabel} was the pink object?</b></p>`;
         prompt.style.textAlign = 'center';
         prompt.style.marginBottom = '20px';
