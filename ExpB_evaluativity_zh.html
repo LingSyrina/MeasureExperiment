@@ -125,7 +125,7 @@
     let pre_stimuli = BlockAppend2({labelDict, configs: slider_config, trialType: 'PreLabelSlider'});
     console.log(`${pre_trial} Preslider baseline stimuli:`, pre_stimuli);
 
-    const comp_config = [{radiusRange:[0,0.3], randRange:[0.3,0.7]},
+    let comp_config = [{radiusRange:[0,0.3], randRange:[0.3,0.7]},
                         {radiusRange:[0.7,1], randRange:[0.3,0.7]}]
 
     const CompOrdBlocks = BlockAppend2({labelDict, configs: comp_config,
@@ -141,8 +141,10 @@
     console.log("Interval learn:", CompIntBlocks);
     console.log("Ratio learn:", CompRatBlocks);
 
-    const equal_config = [{radiusRange:[0,1], randRange:[0.3,0.7]},
-                        {radiusRange:[0,1], randRange:[0.3,0.7]}]
+    comp_config = [{radiusRange:[0.2,0.4], randRange:[0.3,0.7]},
+                        {radiusRange:[0.6,0.8], randRange:[0.3,0.7]}]
+    const equal_config = [{radiusRange:[0.2,0.8], randRange:[0.3,0.7]},
+                        {radiusRange:[0.2,0.8], randRange:[0.3,0.7]}]
     let post_stimuli = BlockAppend2({labelDict, configs: comp_config, numStimuli:Comp_trial, trialType:'CompSlider'});
     post_stimuli = BlockAppend2({stimuliSet:post_stimuli, configs: equal_config, labelDict, numStimuli:Equa_trial, trialType:'EquaSlider'});
     console.log("Test stimuli:", post_stimuli);
@@ -178,18 +180,18 @@
     //Build timeline
     const timeline = [];
     timeline.push(prompts.openning);
-    // timeline.push(consentTrial);
-    // timeline.push(prompts.PreSlider_instruction, preSlider); //Pre-intervention block
-    // if (labelCond == "Ord"){ //comparative + intensifier rel
-    //   timeline.push(prompts.PassAbs_instruction, CompInterPass1, prompts.ActAbs_instruction, CompInterActive1,
-    //                 prompts.PassLearn_continue, CompInterPass2, prompts.ActLearn_continue, CompInterActive2);
-    // } else if (labelCond == "Int"){ //comparative + MP rel
-    //   timeline.push(prompts.PassAbs_instruction, RelInterPass1, prompts.ActAbs_instruction, RelInterActive1,
-    //                 prompts.PassLearn_continue, RelInterPass2, prompts.ActLearn_continue, RelInterActive2);
-    // } else if (labelCond == "Rat"){ //comparative + MP
-    //   timeline.push(prompts.PassAbs_instruction, AbsInterPass1, prompts.ActAbs_instruction, AbsInterActive1,
-    //                 prompts.PassLearn_continue, AbsInterPass2, prompts.ActLearn_continue, AbsInterActive2); //Intervention block
-    // }
+    timeline.push(consentTrial);
+    timeline.push(prompts.PreSlider_instruction, preSlider); //Pre-intervention block
+    if (labelCond == "Ord"){ //comparative + intensifier rel
+      timeline.push(prompts.PassAbs_instruction, CompInterPass1, prompts.ActAbs_instruction, CompInterActive1,
+                    prompts.PassLearn_continue, CompInterPass2, prompts.ActLearn_continue, CompInterActive2);
+    } else if (labelCond == "Int"){ //comparative + MP rel
+      timeline.push(prompts.PassAbs_instruction, RelInterPass1, prompts.ActAbs_instruction, RelInterActive1,
+                    prompts.PassLearn_continue, RelInterPass2, prompts.ActLearn_continue, RelInterActive2);
+    } else if (labelCond == "Rat"){ //comparative + MP
+      timeline.push(prompts.PassAbs_instruction, AbsInterPass1, prompts.ActAbs_instruction, AbsInterActive1,
+                    prompts.PassLearn_continue, AbsInterPass2, prompts.ActLearn_continue, AbsInterActive2); //Intervention block
+    }
     timeline.push(prompts.PostSlider_instruction, postAbsSlider); //Post-intervention block
     timeline.push(prompts.waiting, saveTrial);
     timeline.push(prompts.closing);

@@ -265,9 +265,11 @@ function GeneratePairMorphFlex2({pairConfigs = [{ radiusRange: [0, 1], randRange
       const diff   = Math.abs(p2 - p1);
       const Pos    = p1 < p2;                 // true if final ordering has p1 < p2
       const [adj, key] = getCompAdj({ Pos });
+      const abs    = p1 < 0.5;
+      const [cat, _] = getCompAdj({ abs });
       const degAdv = ModType === 'modifier' ? getDegAdv({ d: (diff-.4) / .2, mode: ModType }): getDegAdv({ d: p2 / .3, mode: ModType });
       // console.log(diff, (diff-.4) / .25);
-      stimuli.push({radius: [p1, p2], rand:[rnd1, rnd2], adj, deg:degAdv.Deg, adv:degAdv.Adv, key, LevKey: degAdv.LevKey, randomlabel:getRandomLabel()});
+      stimuli.push({radius: [p1, p2], cat: cat, rand:[rnd1, rnd2], adj, deg:degAdv.Deg, adv:degAdv.Adv, key, LevKey: degAdv.LevKey, randomlabel:getRandomLabel()});
     }
     return stimuli;
 }

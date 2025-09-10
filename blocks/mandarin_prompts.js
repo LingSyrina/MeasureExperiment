@@ -233,6 +233,7 @@ function DegQSlider(stimulus) {
 `;}
 
 function EquaSlider(stimulus) {
+  const adj = stimulus.adj;
   const correct = stimulus.key; //assume key is a level (numeric)
   const randEqua = stimulus.randomlabel;
   const condition = Math.random() < 0.5 ? 0 : 1;
@@ -252,12 +253,14 @@ function EquaSlider(stimulus) {
     : `<p><b>粉色的图形多${randEqua}?</b></p>
        <p>(请点击滑动条作答。)</p>`;
   stimulus.promptcondition = condition;
+  stimulus.congruity = adj === randEqua ? 'congruit': 'incongruit';
   return `
     <p style="margin-Bottom: 2px !important; font-size: 23px;">粉色的图形____灰色的图形______.</p>
   `;}
 
 function CompSlider(stimulus) {
   const adj = stimulus.adj;
+  const cat = stimulus.cat;
   const correct = stimulus.key; //assume key is a level (numeric)
   const randEqua = stimulus.randomlabel;
   const condition = Math.random() < 0.5 ? 0 : 1;
@@ -276,6 +279,7 @@ function CompSlider(stimulus) {
     : `<p><b>How ${adj} was the pink object?</b></p>
        <p>(Click on the scale to activate the tick.)</p>`;
   stimulus.promptcondition = condition;
+  stimulus.congruity = adj === cat ? 'congruit': 'incongruit';
   return `
     <p style="margin-Bottom: 2px !important; font-size: 23px;">粉色的图形____灰色的图形______.</p>
   `;}
