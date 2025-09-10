@@ -248,6 +248,10 @@ function GerCombinedPass(prompts, block_stimuli, task_name){
       radius: () => jsPsych.timelineVariable('radius'),
       rand: () => jsPsych.timelineVariable('rand'),
       method: () => jsPsych.timelineVariable('method')[1]
+    },
+    on_finish: function() {
+        var curr_progress_bar_value = jsPsych.getProgressBarCompleted();
+        jsPsych.setProgressBar(curr_progress_bar_value + (1/totaltrial));
     }
   });
   //Block configuration
@@ -356,6 +360,8 @@ function GerCombinedAct(prompts, block_stimuli, task_name){
         data.correct = false;
       } else {
         data.correct = true;
+        var curr_progress_bar_value = jsPsych.getProgressBarCompleted();
+        jsPsych.setProgressBar(curr_progress_bar_value + (1/totaltrial));
       }
     }
   });

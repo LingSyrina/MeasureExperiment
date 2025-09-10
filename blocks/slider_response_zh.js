@@ -41,6 +41,10 @@ function GetSlider(prompts, block_stimuli, task_name) {
       rand: () => jsPsych.timelineVariable('rand'),
       method: () => jsPsych.timelineVariable('method'),
       condition: () => jsPsych.timelineVariable('condition')
+    },
+    on_finish: function() {
+        var curr_progress_bar_value = jsPsych.getProgressBarCompleted();
+        jsPsych.setProgressBar(curr_progress_bar_value + (1/totaltrial));
     }
   });
   //Block configuration
@@ -198,7 +202,12 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
         radius: () => jsPsych.timelineVariable('radius'),
         rand: () => jsPsych.timelineVariable('rand'),
         method: () => jsPsych.timelineVariable('method'),
-        condition: () => ['degQ', 'baseline'][jsPsych.timelineVariable('condition')]
+        condition: () => ['degQ', 'baseline'][jsPsych.timelineVariable('promptcondition')],
+        congruity: () => jsPsych.timelineVariable('congruity'),
+      },
+      on_finish: function() {
+          var curr_progress_bar_value = jsPsych.getProgressBarCompleted();
+          jsPsych.setProgressBar(curr_progress_bar_value + (1/totaltrial));
       }
     });
   };

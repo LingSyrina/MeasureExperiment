@@ -16,9 +16,13 @@
     <link href="https://unpkg.com/jspsych/css/jspsych.css" rel="stylesheet" type="text/css">
     <script>
         /** INITIALIZE jsPsych **/
+        // var jsPsych = initJsPsych({
+        //     show_progress_bar: true,
+        //   });
         var jsPsych = initJsPsych({
-            show_progress_bar: true,
-          });
+          show_progress_bar: true,
+          auto_update_progress_bar: false,      // <- IMPORTANT
+        });
     </script>
     <script src="./utils/blob.js"></script>
     <script src="./utils/draw.js"></script>
@@ -101,22 +105,24 @@
     //Define trial numbers
     var pre_trial = 20;
     var learn = 40;
-    var PassActRatio = [7,13,7,13];
+    var PassActRatio = [7,16,7,20];
     var [Equa_trial, Comp_trial] = [20, 20];
+    var totaltrial = 100;
 
-    //debug
-    // //debug block
+    //debug block
     if (__IS_TEST) {
       try {
         pre_trial = 2;
         learn = 4;
         PassActRatio = [1,1,1,1];
         [Equa_trial, Comp_trial] = [1, 1];
+        var totaltrial = 8;
         console.log("Testing mode.");
       } catch (e) {
         console.warn('[TEST] Could not override counts:', e);
       }
     }
+    window.totaltrial = totaltrial;
 
     //               Methods                                      Prompts
     //Slider        {SliderMorph, SliderPair, SliderOverlap};     {PreLabelSlider, DegQSlider, EquaSlider, CompSlider};
