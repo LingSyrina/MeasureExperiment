@@ -143,7 +143,7 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
     type: jsPsychCanvasButtonResponse,
     canvas_size: [250,600],
     stimulus: async function (c) {
-      console.log(jsPsych.timelineVariable('order'), jsPsych.timelineVariable('truelabel'));
+      // console.log(jsPsych.timelineVariable('order'), jsPsych.timelineVariable('truelabel'));
       const method = jsPsych.timelineVariable('method');
       const radius = jsPsych.timelineVariable('radius');
       const rand = jsPsych.timelineVariable('rand');
@@ -177,7 +177,7 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
       method: () => jsPsych.timelineVariable('method')
     },
     on_finish: function(data) { // Score the response as correct or incorrect.
-      console.log(data.order[data.response], data.truelabel);
+      // console.log(data.order[data.response], data.truelabel);
       if (data.order[data.response] != data.truelabel) {
         data.correct = false;
       } else {
@@ -226,7 +226,7 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
         radius: () => jsPsych.timelineVariable('radius'),
         rand: () => jsPsych.timelineVariable('rand'),
         method: () => jsPsych.timelineVariable('method'),
-        condition: () => jsPsych.timelineVariable('condition')
+        condition: () => ['degQ', 'baseline'][jsPsych.timelineVariable('condition')]
       }
     });
   };

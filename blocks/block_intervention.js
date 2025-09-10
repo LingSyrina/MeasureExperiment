@@ -272,7 +272,7 @@ function GerCombinedAct(prompts, block_stimuli, task_name){
     type: jsPsychCanvasButtonResponse,
     canvas_size: [250,600],
     stimulus: async function (c) {
-      console.log(jsPsych.timelineVariable('order'), jsPsych.timelineVariable('adj'));
+      // console.log(jsPsych.timelineVariable('order'), jsPsych.timelineVariable('adj'));
       const method = jsPsych.timelineVariable('method');
       const radius = jsPsych.timelineVariable('radius');
       const rand = jsPsych.timelineVariable('rand');
@@ -318,7 +318,7 @@ function GerCombinedAct(prompts, block_stimuli, task_name){
     type: jsPsychCanvasButtonResponse,
     canvas_size: [250,600],
     stimulus: async function (c) {
-      console.log(jsPsych.timelineVariable('order'), jsPsych.timelineVariable('truemod'));
+      // console.log(jsPsych.timelineVariable('order'), jsPsych.timelineVariable('truemod'));
       const method = jsPsych.timelineVariable('method');
       const radius = jsPsych.timelineVariable('radius');
       const rand = jsPsych.timelineVariable('rand');

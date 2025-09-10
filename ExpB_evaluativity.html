@@ -80,7 +80,7 @@
     console.log("Assigned group:", group);
     var subjectID = setupSubjectID(jsPsych);
     var consentTrial = createConsentTrial();
-    const expID = "jFKxMdNLNIdB"; //register an new experiment via OSF
+    const expID = "qJSIwErPq2FK"; //register an new experiment via OSF
     window.linglabels = Shuffle(['raflen', 'luprit']);
     const [A, B] = linglabels;
     const labelDict = {
@@ -100,19 +100,18 @@
 
     //Define trial numbers
     var pre_trial = 20;
-    var pre_trial = 2;
     var learn = 40;
     var PassActRatio = [7,13,7,13];
-    var [Equa_trial, Comp_trial] = [8, 8];
+    var [Equa_trial, Comp_trial] = [20, 20];
 
-    //debug
-    // //debug block
+    //debug block
     if (__IS_TEST) {
       try {
         pre_trial = 2;
         learn = 4;
         PassActRatio = [1,1,1,1];
         [Equa_trial, Comp_trial] = [1, 1];
+        console.log("Testing mode.");
       } catch (e) {
         console.warn('[TEST] Could not override counts:', e);
       }
