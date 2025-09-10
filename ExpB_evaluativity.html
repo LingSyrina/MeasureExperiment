@@ -176,9 +176,9 @@
 
     //Build timeline
     const timeline = [];
-    // timeline.push(prompts.openning);
-    // timeline.push(consentTrial);
-    // timeline.push(prompts.PreSlider_instruction, preSlider); //Pre-intervention block
+    timeline.push(prompts.openning);
+    timeline.push(consentTrial);
+    timeline.push(prompts.PreSlider_instruction, preSlider); //Pre-intervention block
     if (labelCond == "Ord"){ //comparative + intensifier rel
       timeline.push(prompts.PassAbs_instruction, CompInterPass1, prompts.ActAbs_instruction, CompInterActive1,
                     prompts.PassLearn_continue, CompInterPass2, prompts.ActLearn_continue, CompInterActive2);
@@ -191,7 +191,7 @@
     }
     timeline.push(prompts.PostSlider_instruction, postAbsSlider); //Post-intervention block
     timeline.push(prompts.waiting, saveTrial);
-    
+
     const sonaRedirectURL = "https://iub-pbs-credit.sona-systems.com/webstudy_credit.aspx?experiment_id=923&credit_token=ac13a1489bd94131a49ef0ed33f416e5&survey_code=" + subjectID;
     console.log(sonaRedirectURL);
     timeline.push({
