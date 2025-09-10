@@ -255,6 +255,7 @@ function DegQSlider(stimulus) {
 function EquaSlider(stimulus) {
   const correct = stimulus.key; //assume key is a level (numeric)
   const randEqua = stimulus.randomlabel;
+  const condition = Math.random() < 0.5 ? 0 : 1;
   const LevArray = Array.from({ length: linglabels.length }, (_, i) => i);
   const remainingLabels = LevArray.filter(label => label !== correct);
   const randomLabel = remainingLabels[Math.floor(Math.random() * remainingLabels.length)];
@@ -263,6 +264,13 @@ function EquaSlider(stimulus) {
   stimulus.truelabel = `as ${randEqua} as`;
   const [A, B] = [linglabels[Ia], linglabels[Ib]];
   stimulus.order = [`${A}er than`, `${B}er than`, `as ${randEqua} as`];
+  stimulus.sliderprompt = condition === 1
+    ? `<p>Use the two reference objects,<br>
+         <b>place the pink object you saw</b> on the scale.</p>
+       <p>(Click on the scale to activate the tick.)</p>`
+    : `<p><b>How ${randEqua} was the pink object?</b></p>
+       <p>(Click on the scale to activate the tick.)</p>`;
+  stimulus.promptcondition = condition;
   return `
     <p style="margin-Bottom: 2px !important; font-size: 23px;">The pink object is ___ the grey object.</p>
 `;}
@@ -271,6 +279,7 @@ function CompSlider(stimulus) {
   const adj = stimulus.adj;
   const correct = stimulus.key; //assume key is a level (numeric)
   const randEqua = stimulus.randomlabel;
+  const condition = Math.random() < 0.5 ? 0 : 1;
   const LevArray = Array.from({ length: linglabels.length }, (_, i) => i);
   const remainingLabels = LevArray.filter(label => label !== correct);
   const randomLabel = remainingLabels[Math.floor(Math.random() * remainingLabels.length)];
@@ -279,6 +288,13 @@ function CompSlider(stimulus) {
   stimulus.truelabel = `${adj}er than`;
   const [A, B] = [linglabels[Ia], linglabels[Ib]];
   stimulus.order = [`${A}er than`, `${B}er than`, `as ${randEqua} as`];
+  stimulus.sliderprompt = condition === 1
+    ? `<p>Use the two reference objects,<br>
+         <b>place the pink object you saw</b> on the scale.</p>
+       <p>(Click on the scale to activate the tick.)</p>`
+    : `<p><b>How ${adj} was the pink object?</b></p>
+       <p>(Click on the scale to activate the tick.)</p>`;
+  stimulus.promptcondition = condition;
   return `
     <p style="margin-Bottom: 2px !important; font-size: 23px;">The pink object is ___ the grey object.</p>
 `;}

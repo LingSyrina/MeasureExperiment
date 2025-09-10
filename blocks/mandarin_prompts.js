@@ -235,6 +235,7 @@ function DegQSlider(stimulus) {
 function EquaSlider(stimulus) {
   const correct = stimulus.key; //assume key is a level (numeric)
   const randEqua = stimulus.randomlabel;
+  const condition = Math.random() < 0.5 ? 0 : 1;
   const LevArray = Array.from({ length: linglabels.length }, (_, i) => i);
   const remainingLabels = LevArray.filter(label => label !== correct);
   const randomLabel = remainingLabels[Math.floor(Math.random() * remainingLabels.length)];
@@ -244,6 +245,13 @@ function EquaSlider(stimulus) {
   stimulus.adj = randEqua;
   const [A, B] = [linglabels[Ia], linglabels[Ib]];
   stimulus.order = [`比...${A}`, `比...${B}`, `和...一样${randEqua}`];
+  stimulus.sliderprompt = condition === 1
+    ? `<p>参考两端灰色的图形，<br>
+         你会把<b>粉色的图形</b>放在滑动条的哪个位置？</b></p>
+         <p>(请点击滑动条作答。)</p>`
+    : `<p><b>粉色的图形多${randEqua}?</b></p>
+       <p>(请点击滑动条作答。)</p>`;
+  stimulus.promptcondition = condition;
   return `
     <p style="margin-Bottom: 2px !important; font-size: 23px;">粉色的图形____灰色的图形______.</p>
   `;}
@@ -252,6 +260,7 @@ function CompSlider(stimulus) {
   const adj = stimulus.adj;
   const correct = stimulus.key; //assume key is a level (numeric)
   const randEqua = stimulus.randomlabel;
+  const condition = Math.random() < 0.5 ? 0 : 1;
   const LevArray = Array.from({ length: linglabels.length }, (_, i) => i);
   const remainingLabels = LevArray.filter(label => label !== correct);
   const randomLabel = remainingLabels[Math.floor(Math.random() * remainingLabels.length)];
@@ -260,6 +269,13 @@ function CompSlider(stimulus) {
   stimulus.truelabel = `比...${adj}`;
   const [A, B] = [linglabels[Ia], linglabels[Ib]];
   stimulus.order = [`比...${A}`, `比...${B}`, `和...一样${randEqua}`];
+  stimulus.sliderprompt = condition === 1
+    ? `<p>Use the two reference objects,<br>
+         <b>place the pink object you saw</b> on the scale.</p>
+       <p>(Click on the scale to activate the tick.)</p>`
+    : `<p><b>How ${adj} was the pink object?</b></p>
+       <p>(Click on the scale to activate the tick.)</p>`;
+  stimulus.promptcondition = condition;
   return `
     <p style="margin-Bottom: 2px !important; font-size: 23px;">粉色的图形____灰色的图形______.</p>
   `;}

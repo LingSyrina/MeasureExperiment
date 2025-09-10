@@ -161,7 +161,7 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
       const prompt = document.createElement('div');
       prompt.innerHTML = jsPsych.timelineVariable('prompt');
       prompt.style.textAlign = 'center';
-      prompt.style.marginTop = '10px';
+      prompt.style.marginTop = '20px';
       canvas.insertAdjacentElement('afterend', prompt); // Insert the prompt after the canvas
     },
     choices: jsPsych.timelineVariable('order'),
@@ -187,7 +187,7 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
   });
 
   const createSliderOnlyTrial = () => {
-    let _condition, _randlabel;
+    let _randlabel, _truelabel;
 
     return ({
       type: jsPsychCanvasSliderResponse,
@@ -196,29 +196,27 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
         const method = 'SliderRef';
         const radius = jsPsych.timelineVariable('radius');
         const rand = jsPsych.timelineVariable('rand');
-        _randlabel = jsPsych.timelineVariable('randomlabel');
-        _condition = Math.random() < 0.5 ? 1 : 0; // governs reference order
-        await Morphfunction({ canvas: c, par: radius, rand: rand, condition: _condition, method: method });
+        const condition = jsPsych.timelineVariable('condition');
+        await Morphfunction({ canvas: c, par: radius, rand: rand, condition: condition, method: method });
         return c;
       },
       on_start: function() {
+        _truelabel = jsPsych.timelineVariable('truelabel');
+        _randlabel = jsPsych.timelineVariable('randomlabel');
         const container = jsPsych.getDisplayElement();
         container.innerHTML = ''; // Clear previous content
       },
       on_load: function() { // Insert the prompt below canvas based on condition
         const canvas = document.querySelector('canvas');
-        const prompt = document.createElement('div');
-        const truelabel = jsPsych.timelineVariable('truelabel');
-        const statement = `<p style="margin-Bottom: 5px !important;"><b>The pink object was ${truelabel} the grey object.</b></p>`
-        prompt.innerHTML = _condition === 1
-          ? statement + `<p style="margin-Bottom: 5px !important;">Use the two reference objects, </br><b>place the pink object you saw </b> on the scale.</p>`
-          : statement + `<p style="margin-Bottom: 5px !important;"><b>How ${_randlabel} was the pink object?</b></p>`;
-        prompt.style.textAlign = 'center';
-        prompt.style.marginBottom = '20px';
-        canvas.insertAdjacentElement('beforebegin', prompt);
+        // Statement ABOVE
+        const statement = document.createElement('div');
+        statement.innerHTML = `<p><b>The pink object was ${_truelabel} the grey object.</b></p>`;
+        statement.style.textAlign = 'center';
+        statement.style.marginBottom = '20px';
+        canvas.insertAdjacentElement('beforebegin', statement);
       },
       // prompt is handled in on_load
-      prompt: '',
+      prompt: jsPsych.timelineVariable('sliderprompt'),
       require_movement: true,
       response_ends_trial: true,
       data: {
@@ -226,7 +224,7 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
         radius: () => jsPsych.timelineVariable('radius'),
         rand: () => jsPsych.timelineVariable('rand'),
         method: () => jsPsych.timelineVariable('method'),
-        condition: () => ['degQ', 'baseline'][jsPsych.timelineVariable('condition')]
+        condition: () => ['degQ', 'baseline'][jsPsych.timelineVariable('promptcondition')]
       }
     });
   };

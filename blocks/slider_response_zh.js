@@ -132,7 +132,7 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
       const prompt = document.createElement('div');
       prompt.innerHTML = jsPsych.timelineVariable('prompt');
       prompt.style.textAlign = 'center';
-      prompt.style.marginTop = '10px';
+      prompt.style.marginTop = '20px';
       canvas.insertAdjacentElement('afterend', prompt); // Insert the prompt after the canvas
     },
     choices: jsPsych.timelineVariable('order'),
@@ -167,30 +167,30 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
         const method = 'SliderRef';
         const radius = jsPsych.timelineVariable('radius');
         const rand = jsPsych.timelineVariable('rand');
-        _condition = Math.random() < 0.5 ? 1 : 0; // governs reference order
-        await Morphfunction({ canvas: c, par: radius, rand: rand, condition: _condition, method: method });
+        const condition = jsPsych.timelineVariable('condition'); // governs reference order
+        await Morphfunction({ canvas: c, par: radius, rand: rand, condition: condition, method: method });
         return c;
       },
       on_start: function() {
+        _truelabel = jsPsych.timelineVariable('truelabel');
+        _randlabel = jsPsych.timelineVariable('randomlabel');
         const container = jsPsych.getDisplayElement();
         container.innerHTML = ''; // Clear previous content
       },
       on_load: function() { // Insert the prompt below canvas based on condition
         const canvas = document.querySelector('canvas');
-        const prompt = document.createElement('div');
         const adj = jsPsych.timelineVariable('adj');
         const truelabel = jsPsych.timelineVariable('truelabel');
         const [before, after] = truelabel.split(/\.\.\./);
-        const statement = `<p style="margin-Bottom: 5px !important;">粉色的图形${before}灰色的图形<b>${after}</b>。</p>`
-        prompt.innerHTML = _condition === 1
-          ? statement + `<p style="margin-Bottom: 5px !important;">根据灰色参照物, <b>将粉色的图形放在滑条上</b>。</p>`
-          : statement + `<p style="margin-Bottom: 5px !important;"><b>粉色的图形多${adj}?</b></p>`;
-        prompt.style.textAlign = 'center';
-        prompt.style.marginBottom = '20px';
-        canvas.insertAdjacentElement('beforebegin', prompt);
+        // Statement ABOVE
+        const statement = document.createElement('div');
+        statement.innerHTML = `<p><b>粉色的图形${before}灰色的图形<b>${after}</b></p>`;
+        statement.style.textAlign = 'center';
+        statement.style.marginBottom = '20px';
+        canvas.insertAdjacentElement('beforebegin', statement);
       },
       // prompt is handled in on_load
-      prompt: '',
+      prompt: jsPsych.timelineVariable('sliderprompt'),
       require_movement: true,
       response_ends_trial: true,
       data: {
