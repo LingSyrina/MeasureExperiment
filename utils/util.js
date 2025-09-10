@@ -164,7 +164,7 @@ function getDegAdv({ d, mode = 'modifier' }){
     // console.log(degree, Ind, Adv);
     degree = Ind+1;
   } else if (mode === 'complement') {
-    Ind = Math.min(2, Math.max(0, Math.round(degree - 1)));
+    Ind = Math.min(2, Math.max(0, Math.floor(degree - 1.2)));
     const Compadv = ['slightly', 'somewhat', 'very'];
     Adv = Compadv[Ind] || 'unknown'; // Avoid out-of-bounds error
     degree = Ind + 3;
