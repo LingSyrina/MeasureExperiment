@@ -153,16 +153,17 @@ function getCompAdj({ Pos }) {
 // mode can be `modifier` (morph pair) or `complement` (single morph)
 // To garantee 3 levels at both mode, d in [0.10, 0.50] modifier, in [0.4, 0.8] in complement
 function getDegAdv({ d, mode = 'modifier' }){
-  var degree = Math.floor(d);
+  var degree = d;
   let Adv, Ind;
   // console.log(degree);
   if (mode === 'modifier'){
-    Ind = Math.min(2, Math.max(0, Math.round(degree - 1)));
+    Ind = Math.min(2, Math.max(0, Math.floor(degree - 1)));
     const Modadv = ['slightly', 'somewhat', 'much'];
     Adv = Modadv[Ind] || 'unknown';
     degree = Ind + 1;
   } else if (mode === 'complement') {
-    Ind = Math.min(2, Math.max(0, Math.round(degree - 1)));
+    Ind = Math.min(2, Math.max(0, Math.floor(degree - 1)));
+    console.log('complement',Ind);
     const Compadv = ['slightly', 'somewhat', 'very'];
     Adv = Compadv[Ind] || 'unknown'; // Avoid out-of-bounds error
     degree = Ind + 3;
@@ -263,7 +264,7 @@ function GeneratePairMorphFlex2({pairConfigs = [{ radiusRange: [0, 1], randRange
       const diff   = Math.abs(p2 - p1);
       const Pos    = p1 < p2;                 // true if final ordering has p1 < p2
       const [adj, key] = getCompAdj({ Pos });
-      const degAdv = ModType === 'modifier' ? getDegAdv({ d: diff / .2, mode: ModType }): getDegAdv({ d: p2 / .3, mode: ModType });
+      const degAdv = ModType === 'modifier' ? getDegAdv({ d: diff / .275, mode: ModType }): getDegAdv({ d: p2 / .3, mode: ModType });
       // console.log(ModType, degAdv);
       stimuli.push({radius: [p1, p2], rand:[rnd1, rnd2], adj, deg:degAdv.Deg, adv:degAdv.Adv, key, LevKey: degAdv.LevKey, randomlabel:getRandomLabel()});
     }
