@@ -188,7 +188,7 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
         const [before, after] = truelabel.split(/\.\.\./);
         // Statement ABOVE
         const statement = document.createElement('div');
-        statement.innerHTML = `<p><b>粉色的图形${before}灰色的图形<b>${after}</b></p>`;
+        statement.innerHTML = `<p><b>粉色的图形${before}灰色的图形<b>${after}</b>。</p>`;
         statement.style.textAlign = 'center';
         statement.style.marginBottom = '20px';
         canvas.insertAdjacentElement('beforebegin', statement);
@@ -197,6 +197,7 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
       prompt: jsPsych.timelineVariable('sliderprompt'),
       require_movement: true,
       response_ends_trial: true,
+      button_label: '继续',
       data: {
         task: task_name,
         radius: () => jsPsych.timelineVariable('radius'),

@@ -273,11 +273,11 @@ function CompSlider(stimulus) {
   const [A, B] = [linglabels[Ia], linglabels[Ib]];
   stimulus.order = [`比...${A}`, `比...${B}`, `和...一样${randEqua}`];
   stimulus.sliderprompt = condition === 1
-    ? `<p>Use the two reference objects,<br>
-         <b>place the pink object you saw</b> on the scale.</p>
-       <p>(Click on the scale to activate the tick.)</p>`
-    : `<p><b>How ${adj} was the pink object?</b></p>
-       <p>(Click on the scale to activate the tick.)</p>`;
+    ? `<p>参考两端灰色的图形，<br>
+         你会把<b>粉色的图形</b>放在滑动条的哪个位置？</b></p>
+         <p>(请点击滑动条作答。)</p>`
+    : `<p><b>粉色的图形多${adj}?</b></p>
+       <p>(请点击滑动条作答。)</p>`;
   stimulus.promptcondition = condition;
   stimulus.congruity = adj === cat ? 'congruit': 'incongruit';
   return `
