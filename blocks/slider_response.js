@@ -1,14 +1,14 @@
 function createLoopedSliderPair(stim, createTrialA, createTrialB, prompts, pair=false) {
     return {
         timeline: [
-            prompts.fixation,
+            prompts.fixation,  // Short fixation before button
             (pair === true ? prompts.pausePair : prompts.pause),
             { timeline: [createTrialA(), feedback],
               timeline_variables: [stim], // Pass individual stimulus as timeline variable
               loop_function: function (data) {
                 return !data.values()[0].correct; // Continue looping if the response was incorrect
             }},
-            prompts.fixation,
+            prompts.fixationLong,  // Long fixation between button and slider (promotes verbal encoding)
             { timeline: [createTrialB()],
               timeline_variables: [stim], // Pass individual stimulus as timeline variable
             }
@@ -25,7 +25,7 @@ function GetSlider(prompts, block_stimuli, task_name) {
       const method = jsPsych.timelineVariable('method');
       const radius = jsPsych.timelineVariable('radius');
       const rand = jsPsych.timelineVariable('rand');
-      const condition = Math.random() < 0.5 ? 0 : 1; // governs reference order
+      const condition = jsPsych.timelineVariable('condition'); // governs reference order
       await Morphfunction({ canvas: c, par: radius, rand: rand, condition: condition, method: method });
       return c;
     },
@@ -40,7 +40,9 @@ function GetSlider(prompts, block_stimuli, task_name) {
       radius: () => jsPsych.timelineVariable('radius'),
       rand: () => jsPsych.timelineVariable('rand'),
       method: () => jsPsych.timelineVariable('method'),
-      condition: () => jsPsych.timelineVariable('condition')
+      condition: () => jsPsych.timelineVariable('condition'),
+      // For pre_slider: condition controls visual ref order (0=AB, 1=BA)
+      reforder: () => jsPsych.timelineVariable('condition') === 0 ? 'AB' : 'BA'
     },
     on_finish: function() {
         console.log('finishing');
@@ -180,7 +182,9 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
       order:() => jsPsych.timelineVariable('order'),
       key: () => jsPsych.timelineVariable('key'),
       truelabel:() => jsPsych.timelineVariable('truelabel'),
-      method: () => jsPsych.timelineVariable('method')
+      method: () => jsPsych.timelineVariable('method'),
+      congruity: () => jsPsych.timelineVariable('congruity'),
+      reforder: () => jsPsych.timelineVariable('reforder'),
     },
     on_finish: function(data) { // Score the response as correct or incorrect.
       // console.log(data.order[data.response], data.truelabel);
@@ -212,26 +216,45 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
         const container = jsPsych.getDisplayElement();
         container.innerHTML = ''; // Clear previous content
       },
-      on_load: function() { // Insert the prompt below canvas based on condition
+      on_load: function() { // Insert combined statement + question ABOVE canvas in ONE box
         const canvas = document.querySelector('canvas');
-        // Statement ABOVE
-        const statement = document.createElement('div');
-        statement.innerHTML = `<p><b>The pink object was ${_truelabel} the grey object.</b></p>`;
-        statement.style.textAlign = 'center';
-        statement.style.marginBottom = '20px';
-        canvas.insertAdjacentElement('beforebegin', statement);
+        const promptcondition = jsPsych.timelineVariable('promptcondition');
+        
+        // Single unified box with statement AND question
+        const combinedBox = document.createElement('div');
+        combinedBox.innerHTML = `
+          <div style="background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%); 
+                      border: 3px solid #ff9800; 
+                      border-radius: 12px; 
+                      padding: 20px 30px; 
+                      margin: 10px auto 20px auto; 
+                      max-width: 550px;
+                      box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+            <p style="font-size: 20px; font-weight: bold; margin: 0 0 12px 0; color: #333;">
+              The pink object was <span style="color: #d63384; text-decoration: underline;">${_truelabel}</span> the grey object.
+            </p>
+            <hr style="border: none; border-top: 2px dashed #ff9800; margin: 12px 0;">
+            <p style="font-size: 19px; font-weight: bold; margin: 0; color: #0056b3;">
+              ${promptcondition === 1 
+                ? '👉 Place the pink object on the scale based on the references.' 
+                : `👉 How <span style="color: #d63384; text-decoration: underline;">${_randlabel}</span> was the pink object?`}
+            </p>
+          </div>`;
+        combinedBox.style.textAlign = 'center';
+        canvas.insertAdjacentElement('beforebegin', combinedBox);
       },
-      // prompt is handled in on_load
-      prompt: jsPsych.timelineVariable('sliderprompt'),
+      // Instruction appears below slider, above continue button
+      prompt: '<p style="font-size: 13px; color: #666; margin-top: 15px;">(Click on the scale to activate the tick.)</p>',
       require_movement: true,
       response_ends_trial: true,
       data: {
         task: task_name,
         radius: () => jsPsych.timelineVariable('radius'),
         rand: () => jsPsych.timelineVariable('rand'),
-        method: () => jsPsych.timelineVariable('method'),
+        method: () => jsPsych.timelineVariable('method'), //should include condition for alider direction
         condition: () => ['degQ', 'baseline'][jsPsych.timelineVariable('promptcondition')],
         congruity: () => jsPsych.timelineVariable('congruity'),
+        reforder: () => jsPsych.timelineVariable('reforder'),  // AB = A on left, BA = B on left
       },
       on_finish: function() {
           var curr_progress_bar_value = jsPsych.getProgressBarCompleted();

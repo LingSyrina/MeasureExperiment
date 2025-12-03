@@ -416,8 +416,194 @@ function BlockAppend2({stimuliSet = [],labelDict = {}, configs = [],
   }
 }
 
+//********** Stratified Test Stimuli Generation for Experiment 2 ************//
+/**
+ * Generate balanced test stimuli for BOTH CompSlider and EquaSlider
+ * with explicit control over congruity and ambiguity
+ * 
+ * @param {Object} options - Configuration options
+ * @returns {Object} { compStimuli, equaStimuli, allStimuli }
+ */
+function generateBalancedTestStimuli({
+  // CompSlider distribution (comparative trials)
+  numCompCongruent = 6,      // Clear A-B, direction matches zone
+  numCompIncongruentAA = 3,  // Both A, comparing within A
+  numCompIncongruentBB = 3,  // Both B, comparing within B
+  numCompAmbiguous = 4,      // Middle zone involved
+  
+  // EquaSlider distribution (equative trials)
+  numEquaCongruentA = 4,     // Both in A zone, labeled "as A as"
+  numEquaCongruentB = 4,     // Both in B zone, labeled "as B as"
+  numEquaIncongruentA = 3,   // Both in B zone, mislabeled "as A as"
+  numEquaIncongruentB = 3,   // Both in A zone, mislabeled "as B as"
+  numEquaAmbiguous = 4,      // Both in middle zone
+  
+  // Constraints
+  minCompDiff = 0.15,        // Minimum difference for comparative trials
+  randRange = [0.3, 0.7]     // Range for random noise dimension
+} = {}) {
+  
+  // Define zones
+  const A_ZONE = [0.1, 0.4];
+  const B_ZONE = [0.6, 0.9];
+  const MID_ZONE = [0.4, 0.6];
+  
+  // Helpers
+  const randInRange = ([min, max]) => +(min + Math.random() * (max - min)).toFixed(2);
+  const randRand = () => randInRange(randRange);
+  
+  const compStimuli = [];
+  const equaStimuli = [];
+  
+  // ==================== COMPARATIVE TRIALS (p1 ≠ p2) ====================
+  
+  const createCompStim = (p1, p2, category) => {
+    const [rnd1, rnd2] = [randRand(), randRand()];
+    const Pos = p1 < p2;
+    const [adj, key] = getCompAdj({ Pos });
+    const abs = p1 < 0.5;
+    const [cat, catKey] = getCompAdj({ Pos: abs });
+    
+    return {
+      radius: [p1, p2],
+      rand: [rnd1, rnd2],
+      adj,
+      cat,
+      key,
+      deg: 2,
+      adv: 'somewhat',
+      LevKey: 't',
+      randomlabel: getRandomLabel(),
+      // Metadata for analysis
+      _trialType: 'CompSlider',
+      _trialCategory: category,
+      _zoneInfo: `${p1 < 0.5 ? 'A' : 'B'}-${p2 < 0.5 ? 'A' : 'B'}`,
+      _p1Zone: p1 < 0.4 ? 'A' : (p1 > 0.6 ? 'B' : 'MID'),
+      _p2Zone: p2 < 0.4 ? 'A' : (p2 > 0.6 ? 'B' : 'MID')
+    };
+  };
+  
+  // Congruent: A vs B (clear category difference)
+  for (let i = 0; i < numCompCongruent; i++) {
+    let p1, p2, attempts = 0;
+    do {
+      p1 = randInRange(A_ZONE);
+      p2 = randInRange(B_ZONE);
+      attempts++;
+    } while (Math.abs(p1 - p2) < minCompDiff && attempts < 100);
+    
+    // Balance direction: half p1<p2, half p1>p2
+    if (i >= numCompCongruent / 2) [p1, p2] = [p2, p1];
+    compStimuli.push(createCompStim(p1, p2, 'congruent'));
+  }
+  
+  // Incongruent AA: both in A zone
+  for (let i = 0; i < numCompIncongruentAA; i++) {
+    let p1, p2, attempts = 0;
+    do {
+      p1 = randInRange(A_ZONE);
+      p2 = randInRange(A_ZONE);
+      attempts++;
+    } while (Math.abs(p1 - p2) < minCompDiff && attempts < 100);
+    
+    if (i >= numCompIncongruentAA / 2) [p1, p2] = [p2, p1];
+    compStimuli.push(createCompStim(p1, p2, 'incongruent_AA'));
+  }
+  
+  // Incongruent BB: both in B zone
+  for (let i = 0; i < numCompIncongruentBB; i++) {
+    let p1, p2, attempts = 0;
+    do {
+      p1 = randInRange(B_ZONE);
+      p2 = randInRange(B_ZONE);
+      attempts++;
+    } while (Math.abs(p1 - p2) < minCompDiff && attempts < 100);
+    
+    if (i >= numCompIncongruentBB / 2) [p1, p2] = [p2, p1];
+    compStimuli.push(createCompStim(p1, p2, 'incongruent_BB'));
+  }
+  
+  // Ambiguous: middle zone involved
+  for (let i = 0; i < numCompAmbiguous; i++) {
+    const anchor = (i % 2 === 0) ? A_ZONE : B_ZONE;
+    let p1, p2, attempts = 0;
+    do {
+      p1 = randInRange(MID_ZONE);
+      p2 = randInRange(anchor);
+      attempts++;
+    } while (Math.abs(p1 - p2) < minCompDiff && attempts < 100);
+    
+    if (i >= numCompAmbiguous / 2) [p1, p2] = [p2, p1];
+    compStimuli.push(createCompStim(p1, p2, 'ambiguous'));
+  }
+  
+  // ==================== EQUATIVE TRIALS (p1 === p2, exactly equal) ====================
+  
+  const createEquaStim = (zone, forcedLabel, category) => {
+    // Generate exactly equal pair within the zone
+    const base = randInRange(zone);
+    let p1 = +base.toFixed(2);
+    let p2 = p1;  // EXACT same radius for equative trials
+    
+    const [rnd1, rnd2] = [randRand(), randRand()];
+    const actualZone = base < 0.5 ? 'A' : 'B';
+    const zoneLabel = actualZone === 'A' ? linglabels[0] : linglabels[1];
+    
+    return {
+      radius: [p1, p2],
+      rand: [rnd1, rnd2],
+      adj: linglabels[0],            // Placeholder, overwritten by prompt function
+      cat: zoneLabel,
+      key: 0,                        // Will be overwritten by prompt function
+      deg: 0,
+      adv: '',
+      LevKey: 'x',
+      randomlabel: forcedLabel,      // CONTROLLED, not random!
+      // Metadata for analysis
+      _trialType: 'EquaSlider',
+      _trialCategory: category,
+      _zoneInfo: `${actualZone}-${actualZone}`,
+      _forcedLabel: forcedLabel,
+      _objectZone: actualZone
+    };
+  };
+  
+  // Congruent A: Both in A zone, labeled "as A as"
+  for (let i = 0; i < numEquaCongruentA; i++) {
+    equaStimuli.push(createEquaStim(A_ZONE, linglabels[0], 'congruent_A'));
+  }
+  
+  // Congruent B: Both in B zone, labeled "as B as"
+  for (let i = 0; i < numEquaCongruentB; i++) {
+    equaStimuli.push(createEquaStim(B_ZONE, linglabels[1], 'congruent_B'));
+  }
+  
+  // Incongruent: B zone objects, mislabeled "as A as"
+  for (let i = 0; i < numEquaIncongruentA; i++) {
+    equaStimuli.push(createEquaStim(B_ZONE, linglabels[0], 'incongruent_BzoneAlabel'));
+  }
+  
+  // Incongruent: A zone objects, mislabeled "as B as"
+  for (let i = 0; i < numEquaIncongruentB; i++) {
+    equaStimuli.push(createEquaStim(A_ZONE, linglabels[1], 'incongruent_AzoneBlabel'));
+  }
+  
+  // Ambiguous: Middle zone (category unclear)
+  for (let i = 0; i < numEquaAmbiguous; i++) {
+    const label = i % 2 === 0 ? linglabels[0] : linglabels[1];
+    equaStimuli.push(createEquaStim(MID_ZONE, label, 'ambiguous'));
+  }
+  
+  return {
+    compStimuli: Shuffle(compStimuli),
+    equaStimuli: Shuffle(equaStimuli),
+    allStimuli: Shuffle([...compStimuli, ...equaStimuli])
+  };
+}
+
 //******** Incorporate functions globally ********//
 window.Morphfunction = Morphfunction;
 window.Shuffle = Shuffle;
 window.SplitStimuli = SplitStimuli;
 window.BlockAppend = BlockAppend;
+window.generateBalancedTestStimuli = generateBalancedTestStimuli;

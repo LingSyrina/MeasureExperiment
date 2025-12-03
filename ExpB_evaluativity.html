@@ -67,11 +67,101 @@
 
   </head>
   <body>
+
   <script type="module">
+   //********TO DOs ***********//
+   // a. add more incongruit case by allowing the pair to appear on the whole dimension;
+   // b. log congruity during button response testing as well;
+   // c. log slider direction during slider response for calibration;
+   // d. Test with own try, and analyse own data to get sanity check before push again;
+   // e. compare English and Mandarin version for version control;
+
     //Logic for testing mode triggered by URL
     const URLparams = new URLSearchParams(window.location.search);
     const __IS_TEST = URLparams.get('test') === '1';
     const __IS_PRINT = URLparams.get('print') === '1';
+    const __IS_QUICKTEST = URLparams.get('quicktest') === '1';  // Skip learning, minimal trials
+    const __IS_AUTO = URLparams.get('auto') === '1';  // Auto-advance through trials
+    
+    // Auto-advance mode: automatically clicks through trials
+    if (__IS_AUTO) {
+      console.log("🤖 AUTO MODE ENABLED - Will auto-advance through trials");
+      const AUTO_DELAY = 500; // ms between actions
+      
+      const simulateKeyPress = (key = ' ') => {
+        // Try multiple event types and targets for jsPsych compatibility
+        const targets = [document, document.body, document.querySelector('.jspsych-content')];
+        const eventTypes = ['keydown', 'keyup', 'keypress'];
+        
+        targets.forEach(target => {
+          if (!target) return;
+          eventTypes.forEach(type => {
+            target.dispatchEvent(new KeyboardEvent(type, {
+              key: key,
+              code: key === ' ' ? 'Space' : `Key${key.toUpperCase()}`,
+              keyCode: key === ' ' ? 32 : key.charCodeAt(0),
+              which: key === ' ' ? 32 : key.charCodeAt(0),
+              bubbles: true,
+              cancelable: true
+            }));
+          });
+        });
+      };
+      
+      setInterval(() => {
+        // 1. Handle button-response trials FIRST (they have data-choice)
+        const choiceButtons = document.querySelectorAll('button[data-choice]');
+        if (choiceButtons.length > 0) {
+          const randomBtn = choiceButtons[Math.floor(Math.random() * choiceButtons.length)];
+          console.log('🤖 Auto-clicking button:', randomBtn.textContent);
+          randomBtn.click();
+          return;
+        }
+        
+        // 2. Handle slider trials
+        const slider = document.querySelector('input[type="range"]');
+        if (slider) {
+          // Click to activate if inactive
+          if (slider.classList.contains('inactive-slider')) {
+            console.log('🤖 Auto-activating slider');
+            slider.click();
+            return;
+          }
+          
+          // Set random value
+          const newVal = Math.floor(Math.random() * 100);
+          slider.value = newVal;
+          slider.dispatchEvent(new Event('input', { bubbles: true }));
+          slider.dispatchEvent(new Event('change', { bubbles: true }));
+          console.log('🤖 Auto-set slider to:', newVal);
+          
+          // Click continue button
+          const continueBtn = document.querySelector('button.jspsych-btn:not([data-choice])');
+          if (continueBtn && !continueBtn.disabled) {
+            console.log('🤖 Auto-clicking continue');
+            continueBtn.click();
+            return;
+          }
+        }
+        
+        // 3. Press space for keyboard/instruction trials
+        // Try simulated keypress first
+        simulateKeyPress(' ');
+        
+        // If that didn't work, try directly finishing the trial via jsPsych
+        setTimeout(() => {
+          try {
+            if (typeof jsPsych !== 'undefined' && jsPsych.finishTrial) {
+              console.log('🤖 Force-finishing trial via jsPsych.finishTrial()');
+              jsPsych.finishTrial({ response: ' ', rt: AUTO_DELAY });
+            }
+          } catch (e) {
+            // Trial may have already advanced
+          }
+        }, 100);
+        
+      }, AUTO_DELAY);
+    }
     //set global random before random seed to garantee it's non-deterministic
     // global random variables including: linguistic label assignment, By-group condition
     let groupParam = URLparams.get('group');
@@ -110,7 +200,19 @@
     var totaltrial = 100;
 
     //debug block
-    if (__IS_TEST) {
+    if (__IS_QUICKTEST) {
+      // Ultra-minimal: skip learning, just test data structure
+      try {
+        pre_trial = 1;
+        learn = 0;  // Skip learning entirely
+        PassActRatio = [];
+        [Equa_trial, Comp_trial] = [1, 1];
+        var totaltrial = 4;
+        console.log("QUICK TEST mode: Skipping learning phase, minimal trials.");
+      } catch (e) {
+        console.warn('[QUICKTEST] Could not override counts:', e);
+      }
+    } else if (__IS_TEST) {
       try {
         pre_trial = 2;
         learn = 4;
@@ -127,9 +229,10 @@
     //               Methods                                      Prompts
     //Slider        {SliderMorph, SliderPair, SliderOverlap};     {PreLabelSlider, DegQSlider, EquaSlider, CompSlider};
     //Intervention  {MorphSingle, MorphPair};                     {LabelLearn, MeaLearn};
+    console.log(`DEBUG: pre_trial = ${pre_trial}, learn = ${learn}, quicktest = ${__IS_QUICKTEST}, test = ${__IS_TEST}`);
     const slider_config = [{radiusRange:[0,1], randRange:[0.3,0.7], numStimuli:pre_trial}]
     let pre_stimuli = BlockAppend2({labelDict, configs: slider_config, trialType: 'PreLabelSlider'});
-    console.log(`${pre_trial} Preslider baseline stimuli:`, pre_stimuli);
+    console.log(`DEBUG: Created ${pre_stimuli.length} preslider stimuli (expected ${pre_trial}):`, pre_stimuli);
 
     let comp_config = [{radiusRange:[0,0.3], randRange:[0.3,0.7]},
                         {radiusRange:[0.7,1], randRange:[0.3,0.7]}]
@@ -147,13 +250,66 @@
     console.log("Interval learn:", CompIntBlocks);
     console.log("Ratio learn:", CompRatBlocks);
 
-    comp_config = [{radiusRange:[0.2,0.4], randRange:[0.3,0.7]},
-                        {radiusRange:[0.6,0.8], randRange:[0.3,0.7]}]
-    const equal_config = [{radiusRange:[0.2,0.8], randRange:[0.3,0.7]},
-                        {radiusRange:[0.2,0.8], randRange:[0.3,0.7]}]
-    let post_stimuli = BlockAppend2({labelDict, configs: comp_config, numStimuli:Comp_trial, trialType:'CompSlider'});
-    post_stimuli = BlockAppend2({stimuliSet:post_stimuli, configs: equal_config, labelDict, numStimuli:Equa_trial, trialType:'EquaSlider'});
-    console.log("Test stimuli:", post_stimuli);
+    // ==================== TEST STIMULI: Stratified Sampling ====================
+    // Generate balanced test stimuli with explicit control over congruity/ambiguity
+    const isDebugMode = __IS_TEST || __IS_QUICKTEST;
+    const testStimuli = generateBalancedTestStimuli({
+      // CompSlider distribution (comparative trials)
+      // In debug mode: 1 of each type = 4 total; Production: 20 total
+      numCompCongruent: isDebugMode ? 1 : 6,       // Clear A-B comparisons
+      numCompIncongruentAA: isDebugMode ? 1 : 4,   // Both in A zone
+      numCompIncongruentBB: isDebugMode ? 1 : 4,   // Both in B zone
+      numCompAmbiguous: isDebugMode ? 1 : 6,       // Middle zone involved
+      
+      // EquaSlider distribution (equative trials)
+      // In debug mode: 1 of each type = 5 total; Production: 20 total
+      numEquaCongruentA: isDebugMode ? 1 : 3,      // A zone, labeled "as A as"
+      numEquaCongruentB: isDebugMode ? 1 : 3,      // B zone, labeled "as B as"
+      numEquaIncongruentA: isDebugMode ? 1 : 4,    // B zone, mislabeled "as A as"
+      numEquaIncongruentB: isDebugMode ? 1 : 4,    // A zone, mislabeled "as B as"
+      numEquaAmbiguous: isDebugMode ? 1 : 6,       // Middle zone
+      
+      // Constraints
+      minCompDiff: 0.15,         // Minimum perceptual difference for comparative
+      randRange: [0.3, 0.7]
+    });
+    
+    console.log(`DEBUG: Test mode = ${__IS_TEST}, QuickTest = ${__IS_QUICKTEST}`);
+    console.log(`DEBUG: CompSlider count = ${testStimuli.compStimuli.length}, EquaSlider count = ${testStimuli.equaStimuli.length}`);
+    
+    // Process CompSlider stimuli
+    testStimuli.compStimuli.forEach(stim => {
+      stim.prompt = getprompts({ stimulus: stim, promptType: 'CompSlider', labelType: '' });
+      stim.method = 'MorphPair';
+      stim.reflabel = Shuffle([linglabels[linglabels.length - 1], linglabels[0]]);
+      // Track reference order: "AB" if A (linglabels[0]) is on left, "BA" otherwise
+      stim.reforder = stim.reflabel[0] === linglabels[0] ? 'AB' : 'BA';
+      stim.condition = Math.floor(Math.random() * 2);
+    });
+    
+    // Process EquaSlider stimuli
+    testStimuli.equaStimuli.forEach(stim => {
+      stim.prompt = getprompts({ stimulus: stim, promptType: 'EquaSlider', labelType: '' });
+      stim.method = 'MorphPair';
+      stim.reflabel = Shuffle([linglabels[linglabels.length - 1], linglabels[0]]);
+      // Track reference order: "AB" if A (linglabels[0]) is on left, "BA" otherwise
+      stim.reforder = stim.reflabel[0] === linglabels[0] ? 'AB' : 'BA';
+      stim.condition = Math.floor(Math.random() * 2);
+    });
+    
+    // Combine all test stimuli (already shuffled within each type, now shuffle together)
+    let post_stimuli = Shuffle([...testStimuli.compStimuli, ...testStimuli.equaStimuli]);
+    
+    // Update total trial count for progress bar
+    if (__IS_TEST) {
+      totaltrial = pre_trial + learn + testStimuli.compStimuli.length + testStimuli.equaStimuli.length;
+      window.totaltrial = totaltrial;
+    }
+    
+    console.log("Test stimuli breakdown:");
+    console.log("  CompSlider:", testStimuli.compStimuli.length, testStimuli.compStimuli);
+    console.log("  EquaSlider:", testStimuli.equaStimuli.length, testStimuli.equaStimuli);
+    console.log("  Total:", post_stimuli.length);
 
     if (__IS_PRINT) {
       try {// Your function name & args from your comment:
@@ -168,52 +324,107 @@
     const preSlider = GetSlider(prompts, pre_stimuli, 'pre_slider');
     const postAbsSlider = GetCombinedSlider(prompts, post_stimuli, 'test_slider');
 
-    const CompInterPass1 = GerCombinedPass(prompts, CompOrdBlocks[0], 'intervention');
-    const CompInterActive1 = GerCombinedAct(prompts, CompOrdBlocks[1], 'intervention');
-    const CompInterPass2 = GerCombinedPass(prompts, CompOrdBlocks[2], 'intervention');
-    const CompInterActive2 = GerCombinedAct(prompts, CompOrdBlocks[3], 'intervention');
+    // Only create learning trials if not in quicktest mode
+    let CompInterPass1, CompInterActive1, CompInterPass2, CompInterActive2;
+    let RelInterPass1, RelInterActive1, RelInterPass2, RelInterActive2;
+    let AbsInterPass1, AbsInterActive1, AbsInterPass2, AbsInterActive2;
+    
+    if (!__IS_QUICKTEST) {
+      CompInterPass1 = GerCombinedPass(prompts, CompOrdBlocks[0], 'intervention');
+      CompInterActive1 = GerCombinedAct(prompts, CompOrdBlocks[1], 'intervention');
+      CompInterPass2 = GerCombinedPass(prompts, CompOrdBlocks[2], 'intervention');
+      CompInterActive2 = GerCombinedAct(prompts, CompOrdBlocks[3], 'intervention');
 
-    const RelInterPass1 = GerCombinedPass(prompts, CompIntBlocks[0], 'intervention');
-    const RelInterActive1 = GerCombinedAct(prompts, CompIntBlocks[1], 'intervention');
-    const RelInterPass2 = GerCombinedPass(prompts, CompIntBlocks[2], 'intervention');
-    const RelInterActive2 = GerCombinedAct(prompts, CompIntBlocks[3], 'intervention');
+      RelInterPass1 = GerCombinedPass(prompts, CompIntBlocks[0], 'intervention');
+      RelInterActive1 = GerCombinedAct(prompts, CompIntBlocks[1], 'intervention');
+      RelInterPass2 = GerCombinedPass(prompts, CompIntBlocks[2], 'intervention');
+      RelInterActive2 = GerCombinedAct(prompts, CompIntBlocks[3], 'intervention');
 
-    const AbsInterPass1 = GerCombinedPass(prompts, CompRatBlocks[0], 'intervention');
-    const AbsInterActive1 = GerCombinedAct(prompts, CompRatBlocks[1], 'intervention');
-    const AbsInterPass2 = GerCombinedPass(prompts, CompRatBlocks[2], 'intervention');
-    const AbsInterActive2 = GerCombinedAct(prompts, CompRatBlocks[3], 'intervention');
+      AbsInterPass1 = GerCombinedPass(prompts, CompRatBlocks[0], 'intervention');
+      AbsInterActive1 = GerCombinedAct(prompts, CompRatBlocks[1], 'intervention');
+      AbsInterPass2 = GerCombinedPass(prompts, CompRatBlocks[2], 'intervention');
+      AbsInterActive2 = GerCombinedAct(prompts, CompRatBlocks[3], 'intervention');
+    }
 
     //Build timeline
     const timeline = [];
     timeline.push(prompts.openning);
-    timeline.push(consentTrial);
-    timeline.push(prompts.PreSlider_instruction, preSlider); //Pre-intervention block
-    if (labelCond == "Ord"){ //comparative + intensifier rel
-      timeline.push(prompts.PassAbs_instruction, CompInterPass1, prompts.ActAbs_instruction, CompInterActive1,
-                    prompts.PassLearn_continue, CompInterPass2, prompts.ActLearn_continue, CompInterActive2);
-    } else if (labelCond == "Int"){ //comparative + MP rel
-      timeline.push(prompts.PassAbs_instruction, RelInterPass1, prompts.ActAbs_instruction, RelInterActive1,
-                    prompts.PassLearn_continue, RelInterPass2, prompts.ActLearn_continue, RelInterActive2);
-    } else if (labelCond == "Rat"){ //comparative + MP
-      timeline.push(prompts.PassAbs_instruction, AbsInterPass1, prompts.ActAbs_instruction, AbsInterActive1,
-                    prompts.PassLearn_continue, AbsInterPass2, prompts.ActLearn_continue, AbsInterActive2); //Intervention block
+    
+    // Skip consent in quicktest mode
+    if (!__IS_QUICKTEST) {
+      timeline.push(consentTrial);
     }
-    timeline.push(prompts.PostSlider_instruction, postAbsSlider); //Post-intervention block
-    timeline.push(prompts.waiting, saveTrial);
-
-    const sonaRedirectURL = "https://iub-pbs-credit.sona-systems.com/webstudy_credit.aspx?experiment_id=923&credit_token=ac13a1489bd94131a49ef0ed33f416e5&survey_code=" + subjectID;
-    console.log(sonaRedirectURL);
-    timeline.push({
-      type: jsPsychHtmlKeyboardResponse,
-      stimulus: `<p>Your credit shall be automatically applied if you <b>press any key to complete</b> the study.</p>
-                  <p>Alternatively, the researcher will manually apply credit within two working days.</p>`,
-      response_ends_trial: true,
-      on_finish: function() {
-        if (subjectID) {
-          window.location.href = sonaRedirectURL;
-        }
+    
+    timeline.push(prompts.PreSlider_instruction, preSlider); //Pre-intervention block
+    
+    // Skip learning phase in quicktest mode
+    if (!__IS_QUICKTEST) {
+      if (labelCond == "Ord"){ //comparative + intensifier rel
+        timeline.push(prompts.PassAbs_instruction, CompInterPass1, prompts.ActAbs_instruction, CompInterActive1,
+                      prompts.PassLearn_continue, CompInterPass2, prompts.ActLearn_continue, CompInterActive2);
+      } else if (labelCond == "Int"){ //comparative + MP rel
+        timeline.push(prompts.PassAbs_instruction, RelInterPass1, prompts.ActAbs_instruction, RelInterActive1,
+                      prompts.PassLearn_continue, RelInterPass2, prompts.ActLearn_continue, RelInterActive2);
+      } else if (labelCond == "Rat"){ //comparative + MP
+        timeline.push(prompts.PassAbs_instruction, AbsInterPass1, prompts.ActAbs_instruction, AbsInterActive1,
+                      prompts.PassLearn_continue, AbsInterPass2, prompts.ActLearn_continue, AbsInterActive2); //Intervention block
       }
-    });
+    } else {
+      console.log("QUICKTEST: Skipping learning phase");
+    }
+    
+    timeline.push(prompts.PostSlider_instruction, postAbsSlider); //Post-intervention block
+    
+    // In test/quicktest mode: save locally instead of to OSF
+    if (__IS_TEST || __IS_QUICKTEST) {
+      const localSaveTrial = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<p>Debug mode: Press any key to download data locally.</p>`,
+        response_ends_trial: true,
+        on_finish: function() {
+          const csv = jsPsych.data.get().csv();
+          const blob = new Blob([csv], { type: 'text/csv' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `DEBUG_${subjectID}_${condition}_${Date.now()}.csv`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          
+          // Also log to console for inspection
+          console.log("=== DEBUG DATA STRUCTURE ===");
+          console.log("All data:", jsPsych.data.get().values());
+          console.log("Test slider data:", jsPsych.data.get().filter({task: 'test_slider'}).values());
+          console.log("Button response data:", jsPsych.data.get().filter({task: 'ButtonforSlider'}).values());
+        }
+      };
+      timeline.push(prompts.waiting, localSaveTrial);
+      timeline.push({
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<p style="font-size:20px;font-weight:bold;">Debug run complete!</p>
+                   <p>Check the downloaded CSV and console for data structure.</p>
+                   <p>Press any key to finish.</p>`,
+        response_ends_trial: true
+      });
+    } else {
+      // Production mode: save to OSF
+      timeline.push(prompts.waiting, saveTrial);
+      const sonaRedirectURL = "https://iub-pbs-credit.sona-systems.com/webstudy_credit.aspx?experiment_id=923&credit_token=ac13a1489bd94131a49ef0ed33f416e5&survey_code=" + subjectID;
+      console.log(sonaRedirectURL);
+      timeline.push({
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: `<p>Your credit shall be automatically applied if you <b>press any key to complete</b> the study.</p>
+                    <p>Alternatively, the researcher will manually apply credit within two working days.</p>`,
+        response_ends_trial: true,
+        on_finish: function() {
+          if (subjectID) {
+            window.location.href = sonaRedirectURL;
+          }
+        }
+      });
+    }
 
     jsPsych.run(timeline)
   </script>

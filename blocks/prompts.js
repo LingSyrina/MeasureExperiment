@@ -186,7 +186,14 @@ var fixation = {
  type: jsPsychHtmlKeyboardResponse,
  stimulus: `<div style="font-size:60px;">+</div>`,
  choices: "NO_KEYS",
- trial_duration: 500
+ trial_duration: 500  // Short fixation for general use
+};
+
+var fixationLong = {
+ type: jsPsychHtmlKeyboardResponse,
+ stimulus: `<div style="font-size:60px;">+</div>`,
+ choices: "NO_KEYS",
+ trial_duration: 2000  // Long fixation between button and slider to promote verbal encoding
 };
 
 var pause = {
@@ -228,6 +235,7 @@ function getpromptTrials() {
     closing: closing,
     // fixation
     fixation: fixation,
+    fixationLong: fixationLong,  // Long fixation for between button and slider
     pause: pause,
     pausePair: pausePair
   };
@@ -255,7 +263,7 @@ function DegQSlider(stimulus) {
 function EquaSlider(stimulus) {
   const adj = stimulus.adj;
   const correct = stimulus.key; //assume key is a level (numeric)
-  const randEqua = stimulus.randomlabel;
+  const randEqua = stimulus.randomlabel;  // Now controlled by generateBalancedTestStimuli
   const condition = Math.random() < 0.5 ? 0 : 1;
   const LevArray = Array.from({ length: linglabels.length }, (_, i) => i);
   const remainingLabels = LevArray.filter(label => label !== correct);
@@ -263,16 +271,33 @@ function EquaSlider(stimulus) {
   const [Ia, Ib] = Shuffle([randomLabel, correct]);
   stimulus.key = (Ia === correct) ? 'q': 'p';
   stimulus.truelabel = `as ${randEqua} as`;
+  stimulus.adj = randEqua;  // Store for data logging
   const [A, B] = [linglabels[Ia], linglabels[Ib]];
   stimulus.order = [`${A}er than`, `${B}er than`, `as ${randEqua} as`];
   stimulus.sliderprompt = condition === 1
-    ? `<p>Use the two reference objects,<br>
-         <b>place the pink object you saw</b> on the scale.</p>
-       <p>(Click on the scale to activate the tick.)</p>`
-    : `<p><b>How ${randEqua} was the pink object?</b></p>
-       <p>(Click on the scale to activate the tick.)</p>`;
+    ? `<div style="background: #e8f4f8; border: 2px solid #17a2b8; border-radius: 8px; padding: 12px; margin: 10px auto; max-width: 450px;">
+         <p style="font-size: 18px; margin: 0 0 5px 0;">Use the two reference objects,</p>
+         <p style="font-size: 20px; font-weight: bold; margin: 0; color: #0056b3;">Place the pink object you saw on the scale.</p>
+       </div>
+       <p style="font-size: 14px; color: #666;">(Click on the scale to activate the tick.)</p>`
+    : `<div style="background: #f8e8f4; border: 2px solid #d63384; border-radius: 8px; padding: 12px; margin: 10px auto; max-width: 450px;">
+         <p style="font-size: 22px; font-weight: bold; margin: 0; color: #d63384;">How <u>${randEqua}</u> was the pink object?</p>
+       </div>
+       <p style="font-size: 14px; color: #666;">(Click on the scale to activate the tick.)</p>`;
   stimulus.promptcondition = condition;
-  stimulus.congruity = adj === randEqua ? 'congruit': 'incongruit';
+  
+  // FIXED CONGRUITY: Compare object zone vs label, not adj vs label
+  // Determine object zone based on radius (use average of p1, p2)
+  const avgRadius = (stimulus.radius[0] + stimulus.radius[1]) / 2;
+  const objectZone = avgRadius < 0.5 ? linglabels[0] : linglabels[1];
+  
+  // Check if in ambiguous middle zone
+  if (avgRadius >= 0.4 && avgRadius <= 0.6) {
+    stimulus.congruity = 'ambiguous';
+  } else {
+    stimulus.congruity = objectZone === randEqua ? 'congruit' : 'incongruit';
+  }
+  
   return `
     <p style="margin-Bottom: 2px !important; font-size: 23px;">The pink object is ___ the grey object.</p>
 `;}
@@ -292,13 +317,31 @@ function CompSlider(stimulus) {
   const [A, B] = [linglabels[Ia], linglabels[Ib]];
   stimulus.order = [`${A}er than`, `${B}er than`, `as ${randEqua} as`];
   stimulus.sliderprompt = condition === 1
-    ? `<p>Use the two reference objects,<br>
-         <b>place the pink object you saw</b> on the scale.</p>
-       <p>(Click on the scale to activate the tick.)</p>`
-    : `<p><b>How ${adj} was the pink object?</b></p>
-       <p>(Click on the scale to activate the tick.)</p>`;
+    ? `<div style="background: #e8f4f8; border: 2px solid #17a2b8; border-radius: 8px; padding: 12px; margin: 10px auto; max-width: 450px;">
+         <p style="font-size: 18px; margin: 0 0 5px 0;">Use the two reference objects,</p>
+         <p style="font-size: 20px; font-weight: bold; margin: 0; color: #0056b3;">Place the pink object you saw on the scale.</p>
+       </div>
+       <p style="font-size: 14px; color: #666;">(Click on the scale to activate the tick.)</p>`
+    : `<div style="background: #f8e8f4; border: 2px solid #d63384; border-radius: 8px; padding: 12px; margin: 10px auto; max-width: 450px;">
+         <p style="font-size: 22px; font-weight: bold; margin: 0; color: #d63384;">How <u>${adj}</u> was the pink object?</p>
+       </div>
+       <p style="font-size: 14px; color: #666;">(Click on the scale to activate the tick.)</p>`;
   stimulus.promptcondition = condition;
-  stimulus.congruity = adj === cat ? 'congruit': 'incongruit';
+  
+  // ⚠️ FIXED CONGRUITY: Based on zone membership of BOTH objects
+  const p1 = stimulus.radius[0];
+  const p2 = stimulus.radius[1];
+  const p1Zone = p1 < 0.4 ? 'A' : (p1 > 0.6 ? 'B' : 'MID');
+  const p2Zone = p2 < 0.4 ? 'A' : (p2 > 0.6 ? 'B' : 'MID');
+  
+  if (p1Zone === 'MID' || p2Zone === 'MID') {
+    stimulus.congruity = 'ambiguous';
+  } else if (p1Zone === p2Zone) {
+    stimulus.congruity = 'incongruit';  // Both in same zone
+  } else {
+    stimulus.congruity = 'congruit';     // Different zones (A vs B)
+  }
+  
   return `
     <p style="margin-Bottom: 2px !important; font-size: 23px;">The pink object is ___ the grey object.</p>
 `;}

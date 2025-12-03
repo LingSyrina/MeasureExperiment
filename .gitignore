@@ -1,3 +1,5 @@
 id_rsa_git
 id_rsa_git.pub
 historycode/
+debug_data/
+.DS_Store
