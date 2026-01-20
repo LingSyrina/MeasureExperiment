@@ -155,7 +155,7 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
       const method = jsPsych.timelineVariable('method');
       const radius = jsPsych.timelineVariable('radius');
       const rand = jsPsych.timelineVariable('rand');
-      const condition = Math.random() < 0.5 ? 0 : 1;
+      const condition = jsPsych.timelineVariable('condition');
       await Morphfunction({ canvas: c, par: radius, rand: rand, condition: condition, method: method });
       // const dataURL = canvas.toDataURL();
       return c;
@@ -184,7 +184,7 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
       truelabel:() => jsPsych.timelineVariable('truelabel'),
       method: () => jsPsych.timelineVariable('method'),
       congruity: () => jsPsych.timelineVariable('congruity'),
-      reforder: () => jsPsych.timelineVariable('reforder'),
+      reforder: () => jsPsych.timelineVariable('condition') === 0 ? 'AB' : 'BA' ,
     },
     on_finish: function(data) { // Score the response as correct or incorrect.
       // console.log(data.order[data.response], data.truelabel);
@@ -252,7 +252,7 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
         radius: () => jsPsych.timelineVariable('radius'),
         rand: () => jsPsych.timelineVariable('rand'),
         method: () => jsPsych.timelineVariable('method'), //should include condition for alider direction
-        condition: () => ['degQ', 'baseline'][jsPsych.timelineVariable('promptcondition')],
+        promptcondition: () => ['degQ', 'baseline'][jsPsych.timelineVariable('promptcondition')],
         congruity: () => jsPsych.timelineVariable('congruity'),
         reforder: () => jsPsych.timelineVariable('reforder'),  // AB = A on left, BA = B on left
       },

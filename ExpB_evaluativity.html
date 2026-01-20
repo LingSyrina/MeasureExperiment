@@ -283,7 +283,7 @@
       stim.method = 'MorphPair';
       stim.reflabel = Shuffle([linglabels[linglabels.length - 1], linglabels[0]]);
       // Track reference order: "AB" if A (linglabels[0]) is on left, "BA" otherwise
-      stim.reforder = stim.reflabel[0] === linglabels[0] ? 'AB' : 'BA';
+      // stim.reforder = stim.reflabel[0] === linglabels[0] ? 'AB' : 'BA';
       stim.condition = Math.floor(Math.random() * 2);
     });
     
@@ -293,7 +293,7 @@
       stim.method = 'MorphPair';
       stim.reflabel = Shuffle([linglabels[linglabels.length - 1], linglabels[0]]);
       // Track reference order: "AB" if A (linglabels[0]) is on left, "BA" otherwise
-      stim.reforder = stim.reflabel[0] === linglabels[0] ? 'AB' : 'BA';
+      // stim.reforder = stim.reflabel[0] === linglabels[0] ? 'AB' : 'BA';
       stim.condition = Math.floor(Math.random() * 2);
     });
     
@@ -310,6 +310,7 @@
     console.log("  CompSlider:", testStimuli.compStimuli.length, testStimuli.compStimuli);
     console.log("  EquaSlider:", testStimuli.equaStimuli.length, testStimuli.equaStimuli);
     console.log("  Total:", post_stimuli.length);
+
 
     if (__IS_PRINT) {
       try {// Your function name & args from your comment:
