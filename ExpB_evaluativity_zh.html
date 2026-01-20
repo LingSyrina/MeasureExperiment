@@ -273,8 +273,9 @@
       stim.method = 'MorphPair';
       stim.reflabel = Shuffle([linglabels[linglabels.length - 1], linglabels[0]]);
       // Track reference order: "AB" if A (linglabels[0]) is on left, "BA" otherwise
-      stim.reforder = stim.reflabel[0] === linglabels[0] ? 'AB' : 'BA';
+      // stim.reforder = stim.reflabel[0] === linglabels[0] ? 'AB' : 'BA';
       stim.condition = Math.floor(Math.random() * 2);
+      // stim.reforder = stim.condition === 0 ? 'AB' : 'BA';
     });
     
     // Process EquaSlider stimuli
@@ -283,8 +284,9 @@
       stim.method = 'MorphPair';
       stim.reflabel = Shuffle([linglabels[linglabels.length - 1], linglabels[0]]);
       // Track reference order: "AB" if A (linglabels[0]) is on left, "BA" otherwise
-      stim.reforder = stim.reflabel[0] === linglabels[0] ? 'AB' : 'BA';
+      // stim.reforder = stim.reflabel[0] === linglabels[0] ? 'AB' : 'BA';
       stim.condition = Math.floor(Math.random() * 2);
+      // stim.reforder = stim.condition === 0 ? 'AB' : 'BA';
     });
     
     // Combine all test stimuli (already shuffled within each type, now shuffle together)
