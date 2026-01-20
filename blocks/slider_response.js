@@ -254,7 +254,7 @@ function GetCombinedSlider(prompts, block_stimuli, task_name) {
         method: () => jsPsych.timelineVariable('method'), //should include condition for alider direction
         promptcondition: () => ['degQ', 'baseline'][jsPsych.timelineVariable('promptcondition')],
         congruity: () => jsPsych.timelineVariable('congruity'),
-        reforder: () => jsPsych.timelineVariable('reforder'),  // AB = A on left, BA = B on left
+        reforder: () => jsPsych.timelineVariable('condition') === 0 ? 'AB' : 'BA'  // AB = A on left, BA = B on left
       },
       on_finish: function() {
           var curr_progress_bar_value = jsPsych.getProgressBarCompleted();
